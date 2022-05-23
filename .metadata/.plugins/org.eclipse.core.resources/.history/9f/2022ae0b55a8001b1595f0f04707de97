@@ -1,0 +1,30 @@
+package com.lamichhane.jaxrsinjection;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.lamichhane.jaxrsinjection.model.Passanger;
+
+
+public class PassangerServiceImpl implements PassengerService {
+	
+	List<Passanger> passengers=new ArrayList<>();
+	int currentId=123;
+
+	@Override
+	public List<Passanger> getPassangers() {
+		
+		return passengers;
+	}
+
+	@Override
+	public Passanger addPassanger(Passanger passanger) 
+	{
+		passanger.setId(currentId++);
+		passengers.add(passanger);
+		return passanger;
+	}
+
+
+
+}

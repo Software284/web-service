@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring accessors="true" comment="Delete element from project &apos;NMB_Customization&apos;&#x0D;&#x0A;- Original project: &apos;NMB_Customization&apos;&#x0D;&#x0A;- Original element: &apos;com.newgen.nmb.integrations.CASA.CustomAPI.java&apos;" description="Delete element" element1="/src&lt;com.newgen.nmb.integrations.CASA{CustomAPI.java" elements="1" flags="589830" id="org.eclipse.jdt.ui.delete" resources="0" stamp="1619090388062" subPackages="false" version="1.0"/>
+</session>

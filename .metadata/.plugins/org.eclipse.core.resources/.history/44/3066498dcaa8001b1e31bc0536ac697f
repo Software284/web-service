@@ -1,0 +1,20 @@
+package com.lamichhane.restattachmentclient;
+
+import java.io.File;
+import java.io.FileInputStream;
+
+import org.apache.cxf.jaxrs.client.WebClient;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+
+public class FileClient {
+
+	public static void main(String[] args)
+	{
+		WebClient client=WebClient.create("http://localhost:8080:restattachments/service/fileService/upload");
+		client.type("multipart/form-data");
+		ContentDisposition cd=new ContentDispositon("attachment;filename=MAVEN.jpg");
+		Attachment attachment=new Attachment("root",new FileInputStream(new File("")),cd);
+
+	}
+
+}

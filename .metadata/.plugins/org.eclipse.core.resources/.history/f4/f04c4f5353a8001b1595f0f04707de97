@@ -1,0 +1,5 @@
+package com.lamichhane.jaxrsinjection;
+
+public class Passanger {
+
+}

@@ -1,0 +1,27 @@
+package com.lamichhane.jaxrsinjection;
+
+import java.util.List;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+
+import com.lamichhane.jaxrsinjection.model.Passanger;
+
+@Path("passengerservice")
+@Produces("application/xml")
+@Consumes("application/xml")
+public interface PassengerService {
+
+	@Path("/passengers")
+	@GET
+	List<Passanger> getPassangers(QueryParam("start") int start,QueryParam("size") int size;
+
+	@Path("/passengers")
+	@POST
+	Passanger addPassanger(Passanger passanger);
+
+}

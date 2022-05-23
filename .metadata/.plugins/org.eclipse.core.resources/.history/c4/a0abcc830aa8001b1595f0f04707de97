@@ -1,0 +1,4 @@
+
+cxf.jaxrs.component-scan=true
+
+server.servlet.context-path=/restws

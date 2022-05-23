@@ -1,0 +1,15 @@
+package com.lamichhane.restwsasync;
+
+import javax.ws.rs.container.AsyncResponse;
+
+import com.lamichhane.restwsasync.model.ChecksList;
+
+public class CheckProcessorImpl implements CheckProcessor {
+
+	@Override
+	public void processChecks(AsyncResponse response,ChecksList checksList)
+	{
+		response.resume(true);
+	}
+
+}

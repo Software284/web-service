@@ -1,0 +1,12 @@
+package com.lamichhane.mtom;
+
+import javax.activation.DataHandler;
+import javax.jws.WebService;
+
+@WebService
+public interface FileWs 
+{
+	void upload(DataHandler attachment);
+	DataHandler download();
+
+}

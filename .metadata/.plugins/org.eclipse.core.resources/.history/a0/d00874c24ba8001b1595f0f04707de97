@@ -1,0 +1,4 @@
+
+public class MessageBodyWriter implements javax.ws.rs.ext.MessageBodyWriter<T> {
+
+}

@@ -1,0 +1,14 @@
+package com.lamichhane.restattachmentclient;
+
+import org.apache.cxf.jaxrs.client.WebClient;
+
+public class FileClient {
+
+	public static void main(String[] args)
+	{
+		WebClient client=WebClient.create("http://localhost:8080:restattachments/service/fileService/upload");
+		
+
+	}
+
+}

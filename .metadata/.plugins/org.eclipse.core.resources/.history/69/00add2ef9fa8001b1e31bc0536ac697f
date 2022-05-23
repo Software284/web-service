@@ -1,0 +1,5 @@
+package com.lamichhane.restwsasync.model;
+
+public class Check {
+
+}

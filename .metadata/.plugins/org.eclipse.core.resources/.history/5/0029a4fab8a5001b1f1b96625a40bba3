@@ -1,0 +1,3332 @@
+package com.newgen.nmb.integrations.SME;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.ListIterator;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
+import com.newgen.Common.LogMessages;
+import com.newgen.iforms.FormDef;
+import com.newgen.iforms.custom.IFormReference;
+import com.newgen.iforms.custom.IFormServerEventHandler;
+
+public class GridToGridDataFetchSME
+{
+	public static String customDate(String para)
+	{		
+		LogMessages.statusLogSME.info("Para Date to be changed: " + para);
+		String finaldate = "";
+        if (para.length() > 0)
+        {
+            String day = para.split("/", -1)[0];
+            String monthStr = para.split("/", -1)[1];
+            String month;
+            switch (monthStr) {
+                case "Jan":
+                    month = "01";
+                    break;
+                case "Feb":
+                    month = "02";
+                    break;
+                case "Mar":
+                    month = "03";
+                    break;
+                case "Apr":
+                    month = "04";
+                    break;
+                case "May":
+                    month = "05";
+                    break;
+                case "Jun":
+                    month = "06";
+                    break;
+                case "Jul":
+                    month = "07";
+                    break;
+                case "Aug":
+                    month = "08";
+                    break;
+                case "Sep":
+                    month = "09";
+                    break;
+                case "Oct":
+                    month = "10";
+                    break;
+                case "Nov":
+                    month = "11";
+                    break;
+                default:
+                    month = "12";
+            }
+            String year = para.split("/", -1)[2].substring(0, 4);
+            finaldate = day.concat("/").concat(month).concat("/").concat(year);
+        }
+        else
+        {
+        	finaldate="";
+        }
+        LogMessages.statusLogSME.info("Para Date after change: " + finaldate);
+        return finaldate;
+
+	}
+		public static JSONArray gridToGridDataFetch(IFormReference iFormObj)
+		{
+			//fetching all combo data
+			JSONArray fetch_all_combo_data=new JSONArray();
+			
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select ProposalTypeLI,DocumentTypeLI,MultipleBankingStatusLI,ValuationRequirementLI," //04
+				+ "BusinessStatusAR,OtherBank,AutoTurnoverProfessionPD,BranchName,SwapLI,MotorableRoadCIR," // 06
+				+ "OwnershipResidencePD,RelationNMBGroupPD,EducationLevelRetail,NumberDependentRetail,AOChasisNoID," //05
+				+ "AOEngineNoID,CitizenshipIssueDistrictPD,PassportIssueCountryPD,PanRegisterDistrictPD," //04			
+				+ "LocationCIR,RegisteredBodyBD,PanRegisterDistrictBD,PassportIssueCountryPD1,SalesTurnOverBD,FacilityTypeBD,OverDueBD," //07
+				+ "RelationWithExistingBankBD,OccurenceIrregularityBD,Last1YearBD,CICReportBD," //04
+				+ "SCLocationCIR,SCRoadWidthCIR,SCPropertyTypeCIR,SCRoadAccessCIR,SCNetDeductionsCIR,DRWereWeProvidedWithBSIR,DRDoYouFeelTheStockBSIR,DRPowerBackupArrangementBSIR," //08
+				+ "DRBuildingPremiseWhereTheBSIR,DRFireFightingArrangementBSIR,DRPhysicalSecurtiyOfBuildingBSIR,DRTheStockRegisterSystemBSIR,DRIsThePremiseSelfOwnedBSIR," //05
+				+ "DRInCaseOfRentalLeasedBSIR,DRIsThePanRegisterationCertificateBSIR,DRAnyEvidenceThatThereAreBSIR,IHaveConfirmedpossessionCIR,NaksaPassObtainCIR," //05
+				+ "Regularityofsubmission,NoOfStoreyCIR,NoChangeRoadWidthCIR,NameOfOwner,NatureOfIndustryFac,NameOfPartners,NameOfGuarantor,NameOfFirmBD,NameOfConcerns,NameOfBranch," //10
+				+ "NameOfBank,NameOfApartmentCIR,NameKeyPersonPD,NRB94Fac,NRB17Fac,NoOfGuarantor,NoOfCollateral,ProductiveSectorBD,InterchangeSH,FirmRegisterNoBD," //10
+				+ "ConfirmationReviewReportCIR,CovenantDetailsAR,CollateralFromNoMansLandCIR,PYBranchSegmentID,ProposalTypeCIBInd,HEPlotNoWithAreaID,CIFID,PYNameOfBuildingOwnerID," //08
+				+ "InsuranceCompanyID,LoanSegment,LoanProductType,PlotNo,GrandfatherNameCIBInd,MFGCompanyID,WardNo,NameOfItemID,PanRegistrationNo,ProvinceStateGuarantor," //10
+				+ "LandRevenueOfficeCIR,LandedCollateralSH,MobileNoPD,District,NameOfInsuredPropertyID,RelationCollateralOwnerCIR,DRCopyOfLegalRegistrationSC,DRValidityOfDoucmentsSC," //08
+				+ "DRBirCirAsPerBankSC,DRCibReportSC,DRSecurityDocumentSC,DRAllCovenantSC,DRInsuranceCoveringTotalSC,DRBorrowerGuarantorDulySC,DRFamilyNetWorthDeclareSC," //07
+				+ "DRSubmissionOfWorkingSC,DRFullValuationReportProposedSC,DRInCaseOfMultiplePlotsSC,DRConsentFromAllLegalSC,DRInternalDeedForLimitSC,DRWrittenRequestForWaiverSC," //06
+				+ "DRCopyOfCitizenshipCertificateSC,DRCopyOfTheLegalDocumentSC,DrCompanyFirmsAllFinincialSC,DRInCAseOfCOmpaniesSC,DRLoanOutstandingReportSC,DRTotalWcLimitProposedSC," // 06
+				+ "DRTenorOfTlsProposedSC,Qualification,Checklist10,Checklist11,Checklist12,Checklist13,Checklist14,Checklist15,Checklist16,Checklist17,Checklist18,Checklist19," //12
+				+ "Checklist20,Checklist5,Checklist6,Checklist7,Checklist8,Checklist9,RoadAccessCIR,NRB9Fac,CleanCIBreport,Proposaliswithin,ValueConfirmation," //11
+				+ "PYNaksaPassID,PYNameOfInsuredPropertyID,PlotNoCIR,PYRequestedByID,PYNoOfStoreyID,RegisteredBodyBD1,CreditFacilities,AutoTurnOverBusinessPD,SegementLead,AnyRoadSetbackCIR,Submission,AgeofBusiness,Unithasbeen,Unitisin,Nooverdueinstances,EQIoverdue,EQIoverdue1,Quarterlyinterest,Annualaccount,Proposedlimit,ProposedWorking,Proposedterm,"
+				+ "Totalfunded,Proposedoverall,Willhavesole from Ext_Sme where flag2='"+pID+"'"; //10
+				
+				
+				String query2="select LocationBSIR,CorrespondenceAddressBD,AuditCommentsAR,ReasonforDowngradeCCG,RemarksBD"
+						+ ",CommentsCIR,ManagementStructureInfoBD,BusinessManagementRiskBD,PurposeLI,CommentsSD,SecurityRiskSD,OtherDetailsAsPerBlueBookID"
+						+ ",RemarksID,MajorBusinessBD,JustificationFac,DRExplainTheBusinessNatureBSIR,RegularityofPayment from Ext_Sme_2 where caseID='"+pID+"'";
+				
+				
+				String query3="select DRObservationOfBusinessBSIR,DRHowIsTheBusinessDoingBSIR,DRWhatAreTheProspectsBSIR,DRWereWeProvidedRemarksBSIR"
+						+ ",DRDoYouFeelTheStockRemarksBSIR,DRPowerBackupArrangementRemarksBSIR,RepaymentCapacityFinancial,BankingRelationshipAR"
+						+ ",BusinessNature,BusinessActivity,Management,Experienceofproprietor,SupplierInformation,BuyerInformation,AccountStrategy"
+						+ ",SummaryRecommendation,MeasureBusinessActivityBD from Ext_Sme_3 where caseID='"+pID+"'";
+				
+				String query4="select DateOfValuationCIR,ApplicationDate,ExistingReviewDateLI,InsuranceExpiryDateID,CItizenshipIssueDatePD,PassportIssueDatePD,PassportExpiryDatePD,PanRegisterDatePD,"
+						+"OwnershipTransferDate,FirmRegisterExpiryDateBD,PanRegisterDateBD,AuditDateAR,ReviewPeriodTill,ReviewPeriodFrom,PanRegisterDateBD1,PYLatestValuationDateID,"
+						+"NextReviewDateLI from Ext_Sme where flag2='"+pID+"'";
+				
+				String db_linking_query="select FacilityStructureRiskFac,IHaveEnquiredFamilyCIR,VehicleEquipmentRegistrationNoID,ClientNamePD,NameOfKeyPersonLead,KeyPersonContactNoLead,Email,"
+						+ "ExperienceYears,ExperienceFieldPD,FundedAmountLead,NonFundedAmountLead,FinishedGoodsBSIR,LessForCollateralCaseCIR,Limit,NetWorthGuarantor,"
+						+ "MobileNoo,ClientAcNo,ExistingCreditGradeLI,ProposedCreditGradeLI,CreditScoreLI,PermitNoIndianEmbassyPD,SwappingBankLI,"
+						+ "CommitmentFee,DateOfBirthPD,IfNotCommentCIR,InsuredAssetsID,HELatestValuationDateID,VDCMunicipalityCIBInd,AgeBusinessBD,BusinessIncorporationBD,"
+						+ "BankNameBD,LoanLimitBD,OutstandingAmountBD,OverDueAmountBD,EmailPD,ContactNoMonthlyPD,ExistingTotalFund,TotalFundFacility,TotalFmvBuildingCIR,"
+						+ "ExistingTotalNonFund,TotalNonFundFacility,TotalAssetGuarantor,ExistingTotalLimit,TotalLimitFacility,StoreSparesBSIR,ExistingTotalGroup,"
+						+ "StockTransitBSIR,ShareholdingAmountBD,AdvancesCustomersBSIR,AdvancesSuppliersBSIR,ApprovedLimit,CreditorsBSIR,FMVSD,MortgageValueSD,"
+						+ "ExistingCCG,ContactPersonCIR,ContactNumberCIR,SCCollateralCoverageCIR,SCInCaseLnBCIR,LTV_Value,AORiskCoverageID,NameOfOwnerCIR,ExistingLimitFac,"
+						+ "FundedAmountFac,ConsistentBlueprintCIR,CovenantMonitoringFrequencyAR,ESalesGrowthFin,ENetProfitGrowthFin,ECurrentRatioFin,EInterestCoverageFin,"
+						+ "EDSCRFin,EDrawingPowerFin,EGearingRatioFin,HEAddressOfClientID,TypeOfConstructionCIR,PlaceNameCIR,HENaksaPassID,WardNoCollateralSecurity,"
+						+ "TotalLiabilityGuarantor,Telephone,PYSumInsuredID,RoadAccessBlueprintCIR,FundedOrNonfundedFac,AccountGroupProfitability,AccountStrategyAR,"
+						+ "NameCIBInd,FatherNameCIBInd,GenderCIBInd,NationalityCIBInd,CitizenshipNoCIBInd,IndianEmbassyNoCIBInd,"
+						+ "CitizenshipIssuedDistrictCIBInd,PYConstructionCompletionCertificateID,LoanAmountCIBInd,ProposalTypeCIBInst,NameoftheCompanyCIBInst,"
+						+ "CompanyRegisterNoCIBInst,HENameOfBuildingOwnerID,CompanyRegisteredOrganisation,PANNumberCIBInst,"
+						+ "PYPlotNoWithAreaID,PANIssuedDistrictCIBInst,RegisteredAddressCIBInst,LoanAmountCIBInst,HERiskCoverageIsRSTMDRequiredID,TotalAmountCIB,FatherNamePD,"
+						+ "bankAcNo,StatusCIB,MotherNamePD,CitizenshipIssueDistrictPD1,BackgroundGuarantorPD,CitizenshipNoPD1,GrandfatherNamePD,HENoOfStoreyID,"
+						+ "HEBranchSegmentID,NotesFacilitySummaryFac,PYNameOfClientID,PropertyCIR,PanNoBD,TypeOfSecurityFac,SectorBD,TypeofLoanCIBInd,TypeCreditFacilities,"
+						+ "TypeOfAuditorAR,RelationToApplicant,PanRegisterDistrictPD1,ModelNameID,RiskCoverageID,Proposal_SWAP,ShapeOfLandCIR,Age_Score,Experience_Score,"
+						+ "Ownership_Socre,Loan_score,Relationship_Score,Client_ProfileTotal,SoleMultiple_Score,RelationExistingBank_Score,OccIrregularity_Score,"
+						+ "LastYearMax_Score,CIC_Score,BankingHistory_TotalScore,AgeBusiness_Score ,BusinessIncorporation_Score,SalesTurnOver_Score,BusinessProfile_TotalScore,"
+						+ "SalesGrowth_Score,NetProfit_Score,CurrentRatio_Score,InterestCoverage_Score,DSCR_Score,DrawingPower_Score,GearingRatio,FinancialHealth_TotalScore,"
+						+ "Location_Score,RoadWidth_Score,PropertyType_Score,RoadAccess_Score,NetDeduction_Score,InCaseLnB_Score,SixParameter,POI,CollateralCoverage_Score,POI1,"
+						+ "CollateralDetails_TotalScore,POITotal,WS_ClientProfile,PS_ClientProfile,WS_BankingHistory,PS_BankingHistory,WS_LandedCollateral,PS_LandedCollateral,"
+						+ "WS_BusinessProfile,PS_BusinessProfile ,WS_FinancialHealth,PS_FinancialHealth,RG_TotalScore,InnerOfFac,IndustryMarketRiskBD,RegisterAddressBD,"
+						+ "ProductiveSubSectorBD,PanRegisterDistrictBD1 ,GroupNameBD,GeneralInfoWS,GeneralInfoPS,GeneralInfoW1,VehicleWS,VehiclePS,VehicleW1,IncomeWS,"
+						+ "IncomePS,IncomeW1,NDIRatioWS,NDIRatioPS ,NDIRatioW1,TotalScoreWS,AgeSponsorScore,RemarksAL1,RemarksAL2,RemarksAL3,RemarksAL4,RemarksAL,"
+						+ "TotalStockBSIR,RemarksAL6,RemarksAL7,UsageOfBuildingID,RoadWidthCIR,PYItemNamesInCaseOfStockID,PYAddressOfClientID,ResidenceTelephoneNo,"
+						+ "ShareholderNameBD,Outstanding,AOAddressID,Penal,DebtEquityRatio,InterestCoverRatio,ConstructionAsNaksaPassCIR,AOSumInsuredID,AmountFac,"
+						+ "CommisionsExistingFac,HypothecationGoodsAmountCAC,ClientFirmAddress, MarketGoodsValueCAC,BriefBusinessProfileBD,CFLAmount,LoanDeedAmount,"
+						+ "AutoLoanDeedAmount,ShareLoanDeedAmount,DPNAmount,PersonalGuaranteeAmount,CorporateGuaranteeAmount,GroupGuaranteeAmount,ConsentOfRemAmount,"
+						+ "AccountReceivableAmount,HypoDeedStockAmount,HypoDeedFixAssetsAmount,PledgeDeedAmount,ParipassuDeedAmount,NoObjectionLetterAmount,"
+						+ "ValuationReportAmount,RevaluationReportAmount,MortgageDeedAmount,RokkaLetterAmount,LalpurjaAmount,ConsentLegalHeirAmount,RajnimaPaperAmount,"
+						+ "RemortgageDeedAmount,SimpleRokkaAmount,InternalDeedAmount,TripartyAgreementAmount,StopSupplyAmount,CibReportAmount,CibClearanceAmount,StrAmount,"
+						+ "InsuranceStockAmount,InsuranceBuildingAmount,InsurancePlantAmount,InsuranceVehicleAmount,InsuranceStockPoltryAmount,TermLifeInsuranceAmount,"
+						+ "ManjurnimaYatayatAmount,ManjurinimaToBankAmount,InvoiceValuationAmount,RequestLetterAmount,SharePledgeAmount,DISAmount,UndertakingLetterAmount,"
+						+ "CommitmentLetterAmount,LoanOutstandingAmount,PassCategoryAmount,NcaPositionAmount,TransactionTemplateAmount,OthersAmount,EnvironmentalSocioRiskBD,"
+						+ "CommentsComment,TypeOfMeasurementCIR,TypeFac,StockSymbolSD,StatusOfBuildingConsCIR,TypeOfPropertyCIR,BCCWaiversSH,RelationWithApplicantPD,"
+						+ "AmountMentionTransfer,OutstandingLimitFac,GroupNamePD,InspectedByBSIR,IfNotCommentCIR,InsuredAssetsID,AccountConduct,AgeOfBusinessBD,AgePD,LoanNetworthPD,CurrentMarketPriceOfPublicSD,CurrentMarketPriceOfPromotorSD,EmiLI,CitizenshipIssueDatePD1,TotalAm from Ext_Sme where flag2='"+pID+"'";
+				
+				
+				
+				
+				
+				LogMessages.statusLogSME.info("Query: " + query);
+				LogMessages.statusLogSME.info("Query2: " + query2);
+				LogMessages.statusLogSME.info("Query3: " + query3);
+				LogMessages.statusLogSME.info("Query4: " + query4);
+				LogMessages.statusLogSME.info("DB Linking Query:" + db_linking_query);
+				
+				
+				List QueryList = iFormObj.getDataFromDB(query);
+				List query_ext_two = iFormObj.getDataFromDB(query2);
+				List query_ext_three= iFormObj.getDataFromDB(query3);
+				List query_date_fetch= iFormObj.getDataFromDB(query4);
+				List dblinking_date_fetch= iFormObj.getDataFromDB(db_linking_query);
+				
+				ListIterator QueryListItr = QueryList.listIterator();
+				ListIterator ext_two_iteratior = query_ext_two.listIterator();
+				ListIterator ext_three_iteratior = query_ext_three.listIterator();
+				ListIterator query_date_fetch_iteratior = query_date_fetch.listIterator();
+				ListIterator dblinking_date_fetch_iteratior = dblinking_date_fetch.listIterator();
+				
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					
+					
+					obj.put("ProposalTypeLI",itemsArray[0]);
+					obj.put("DocumentTypeLI",itemsArray[1]);
+					obj.put("MultipleBankingStatusLI",itemsArray[2]);
+					obj.put("ValuationRequirementLI",itemsArray[3]);
+					
+					
+					
+					obj.put("BusinessStatusAR",itemsArray[4]);
+					obj.put("OtherBank",itemsArray[5]);
+					obj.put("AutoTurnoverProfessionPD",itemsArray[6]);
+					obj.put("BranchName",itemsArray[7]);
+					obj.put("SwapLI",itemsArray[8]);
+					obj.put("MotorableRoadCIR",itemsArray[9]);
+					
+					
+					
+					obj.put("OwnershipResidencePD",itemsArray[10]);
+					obj.put("RelationNMBGroupPD",itemsArray[11]);
+					obj.put("EducationLevelRetail",itemsArray[12]);
+					obj.put("NumberDependentRetail",itemsArray[13]);
+					obj.put("AOChasisNoID",itemsArray[14]);
+					
+					
+					
+					obj.put("AOEngineNoID",itemsArray[15]);
+					obj.put("CitizenshipIssueDistrictPD",itemsArray[16]);
+					obj.put("PassportIssueCountryPD",itemsArray[17]);
+					obj.put("PanRegisterDistrictPD",itemsArray[18]);
+					
+					
+					
+					obj.put("LocationCIR",itemsArray[19]);
+					obj.put("RegisteredBodyBD",itemsArray[20]);
+					obj.put("PanRegisterDistrictBD",itemsArray[21]);
+					obj.put("PassportIssueCountryPD1",itemsArray[22]);
+					obj.put("SalesTurnOverBD",itemsArray[23]);
+					obj.put("FacilityTypeBD",itemsArray[24]);
+					obj.put("OverDueBD",itemsArray[25]);
+					
+					
+					
+					obj.put("RelationWithExistingBankBD",itemsArray[26]);
+					obj.put("OccurenceIrregularityBD",itemsArray[27]);
+					obj.put("Last1YearBD",itemsArray[28]);
+					obj.put("CICReportBD",itemsArray[29]);
+					
+					
+					
+					obj.put("SCLocationCIR",itemsArray[30]);
+					obj.put("SCRoadWidthCIR",itemsArray[31]);
+					obj.put("SCPropertyTypeCIR",itemsArray[32]);
+					obj.put("SCRoadAccessCIR",itemsArray[33]);
+					obj.put("SCNetDeductionsCIR",itemsArray[34]);
+					obj.put("DRWereWeProvidedWithBSIR",itemsArray[35]);
+					obj.put("DRDoYouFeelTheStockBSIR",itemsArray[36]);
+					obj.put("DRPowerBackupArrangementBSIR",itemsArray[37]);
+					
+					
+					
+					
+					obj.put("DRBuildingPremiseWhereTheBSIR",itemsArray[38]);
+					obj.put("DRFireFightingArrangementBSIR",itemsArray[39]);
+					obj.put("DRPhysicalSecurtiyOfBuildingBSIR",itemsArray[40]);
+					obj.put("DRTheStockRegisterSystemBSIR",itemsArray[41]);
+					obj.put("DRIsThePremiseSelfOwnedBSIR",itemsArray[42]);
+					
+					
+					
+					
+					obj.put("DRInCaseOfRentalLeasedBSIR",itemsArray[43]);
+					obj.put("DRIsThePanRegisterationCertificateBSIR",itemsArray[44]);
+					obj.put("DRAnyEvidenceThatThereAreBSIR",itemsArray[45]);
+					obj.put("IHaveConfirmedpossessionCIR",itemsArray[46]);
+					obj.put("NaksaPassObtainCIR",itemsArray[47]);
+					
+					
+					
+					
+					obj.put("Regularityofsubmission",itemsArray[48]);
+					obj.put("NoOfStoreyCIR",itemsArray[49]);
+					obj.put("NoChangeRoadWidthCIR",itemsArray[50]);
+					obj.put("NameOfOwner",itemsArray[51]);
+					obj.put("NatureOfIndustryFac",itemsArray[52]);
+					obj.put("NameOfPartners",itemsArray[53]);
+					obj.put("NameOfGuarantor",itemsArray[54]);
+					obj.put("NameOfFirmBD",itemsArray[55]);
+					obj.put("NameOfConcerns",itemsArray[56]);
+					obj.put("NameOfBranch",itemsArray[57]);
+					
+					
+					
+					
+					obj.put("NameOfBank",itemsArray[58]);
+					obj.put("NameOfApartmentCIR",itemsArray[59]);
+					obj.put("NameKeyPersonPD",itemsArray[60]);
+					obj.put("NRB94Fac",itemsArray[61]);
+					obj.put("NRB17Fac",itemsArray[62]);
+					obj.put("NoOfGuarantor",itemsArray[63]);
+					obj.put("NoOfCollateral",itemsArray[64]);
+					obj.put("ProductiveSectorBD",itemsArray[65]);
+					obj.put("InterchangeSH",itemsArray[66]);
+					obj.put("FirmRegisterNoBD",itemsArray[67]);
+					
+					
+					
+					
+					obj.put("ConfirmationReviewReportCIR",itemsArray[68]);
+					obj.put("CovenantDetailsAR",itemsArray[69]);
+					obj.put("CollateralFromNoMansLandCIR",itemsArray[70]);
+					obj.put("PYBranchSegmentID",itemsArray[71]);
+					obj.put("ProposalTypeCIBInd",itemsArray[72]);
+					obj.put("HEPlotNoWithAreaID",itemsArray[73]);
+					obj.put("CIFID",itemsArray[74]);
+					obj.put("PYNameOfBuildingOwnerID",itemsArray[75]);
+					
+					
+					
+					
+					obj.put("InsuranceCompanyID",itemsArray[76]);
+					obj.put("LoanSegment",itemsArray[77]);
+					obj.put("LoanProductType",itemsArray[78]);
+					obj.put("PlotNo",itemsArray[79]);
+					obj.put("GrandfatherNameCIBInd",itemsArray[80]);
+					obj.put("MFGCompanyID",itemsArray[81]);
+					obj.put("WardNo",itemsArray[82]);
+					obj.put("NameOfItemID",itemsArray[83]);
+					obj.put("PanRegistrationNo",itemsArray[84]);
+					obj.put("ProvinceStateGuarantor",itemsArray[85]);
+					
+					
+					
+					
+					obj.put("LandRevenueOfficeCIR",itemsArray[86]);
+					obj.put("LandedCollateralSH",itemsArray[87]);
+					obj.put("MobileNoPD",itemsArray[88]);
+					obj.put("District",itemsArray[89]);
+					obj.put("NameOfInsuredPropertyID",itemsArray[90]);
+					obj.put("RelationCollateralOwnerCIR",itemsArray[91]);
+					obj.put("DRCopyOfLegalRegistrationSC",itemsArray[92]);
+					obj.put("DRValidityOfDoucmentsSC",itemsArray[93]);
+					
+					
+					
+					
+					obj.put("DRBirCirAsPerBankSC",itemsArray[94]);
+					obj.put("DRCibReportSC",itemsArray[95]);
+					obj.put("DRSecurityDocumentSC",itemsArray[96]);
+					obj.put("DRAllCovenantSC",itemsArray[97]);
+					obj.put("DRInsuranceCoveringTotalSC",itemsArray[98]);
+					obj.put("DRBorrowerGuarantorDulySC",itemsArray[99]);
+					obj.put("DRFamilyNetWorthDeclareSC",itemsArray[100]);
+					
+					
+					
+					
+					obj.put("DRSubmissionOfWorkingSC",itemsArray[101]);
+					obj.put("DRFullValuationReportProposedSC",itemsArray[102]);
+					obj.put("DRInCaseOfMultiplePlotsSC",itemsArray[103]);
+					obj.put("DRConsentFromAllLegalSC",itemsArray[104]);
+					obj.put("DRInternalDeedForLimitSC",itemsArray[105]);
+					obj.put("DRWrittenRequestForWaiverSC",itemsArray[106]);
+					
+					
+					
+					obj.put("DRCopyOfCitizenshipCertificateSC",itemsArray[107]);
+					obj.put("DRCopyOfTheLegalDocumentSC",itemsArray[108]);
+					obj.put("DrCompanyFirmsAllFinincialSC",itemsArray[109]);
+					obj.put("DRInCAseOfCOmpaniesSC",itemsArray[110]);
+					obj.put("DRLoanOutstandingReportSC",itemsArray[111]);
+					obj.put("DRTotalWcLimitProposedSC",itemsArray[112]);
+					
+					
+					
+					
+					obj.put("DRTenorOfTlsProposedSC",itemsArray[113]);
+					obj.put("Qualification",itemsArray[114]);
+					obj.put("Checklist10",itemsArray[115]);
+					obj.put("Checklist11",itemsArray[116]);
+					obj.put("Checklist12",itemsArray[117]);
+					obj.put("Checklist13",itemsArray[118]);
+					obj.put("Checklist14",itemsArray[119]);
+					obj.put("Checklist15",itemsArray[120]);
+					obj.put("Checklist16",itemsArray[121]);
+					obj.put("Checklist17",itemsArray[122]);
+					obj.put("Checklist18",itemsArray[123]);
+					obj.put("Checklist19",itemsArray[124]);
+					
+					
+					
+					obj.put("Checklist20",itemsArray[125]);
+				    obj.put("Checklist5",itemsArray[126]);
+					obj.put("Checklist6",itemsArray[127]);
+					obj.put("Checklist7",itemsArray[128]);
+					obj.put("Checklist8",itemsArray[129]);
+					obj.put("Checklist9",itemsArray[130]);
+					obj.put("RoadAccessCIR",itemsArray[131]);
+					obj.put("NRB9Fac",itemsArray[132]);
+					obj.put("CleanCIBreport",itemsArray[133]);
+					obj.put("Proposaliswithin",itemsArray[134]);
+					obj.put("ValueConfirmation",itemsArray[135]);
+					
+					
+					
+					obj.put("PYNaksaPassID",itemsArray[136]);
+					obj.put("PYNameOfInsuredPropertyID",itemsArray[137]);
+					obj.put("PlotNoCIR",itemsArray[138]);
+					obj.put("PYRequestedByID",itemsArray[139]);
+					obj.put("PYNoOfStoreyID",itemsArray[140]);
+					obj.put("RegisteredBodyBD1",itemsArray[141]);
+					obj.put("CreditFacilities",itemsArray[142]);
+					obj.put("AutoTurnOverBusinessPD",itemsArray[143]);
+					obj.put("SegementLead",itemsArray[144]);
+					obj.put("AnyRoadSetbackCIR",itemsArray[145]);
+					obj.put("Submission", itemsArray[146]);
+					
+					obj.put("AgeofBusiness", itemsArray[147]);
+					obj.put("Unithasbeen", itemsArray[148]);
+					obj.put("Unitisin", itemsArray[149]);
+					obj.put("Nooverdueinstances", itemsArray[150]);
+					obj.put("EQIoverdue", itemsArray[151]);
+					obj.put("EQIoverdue1", itemsArray[152]);
+					obj.put("Quarterlyinterest", itemsArray[153]);
+					obj.put("Annualaccount", itemsArray[154]);
+					obj.put("Proposedlimit", itemsArray[155]);
+					obj.put("ProposedWorking", itemsArray[156]);
+					obj.put("Proposedterm", itemsArray[157]);
+					obj.put("Totalfunded", itemsArray[158]);
+					obj.put("Proposedoverall", itemsArray[159]);
+					obj.put("Willhavesole", itemsArray[160]);
+					
+					
+					
+					
+					
+					
+					fetch_all_combo_data.clear();
+					fetch_all_combo_data.add(obj);
+					
+					LogMessages.statusLogSME.info("*** Data fetch to combobox ***");
+					count++;
+				}
+				
+				while(ext_two_iteratior.hasNext())
+				{
+					List query_two_data=(List)ext_two_iteratior.next();
+					String[] query_two_array = new String[query_two_data.size()];
+					query_two_array = (String[]) query_two_data.toArray(query_two_array);
+					
+					JSONObject ext_one = new JSONObject();
+					ext_one.put("textarea29",query_two_array[0]);
+					ext_one.put("textarea63",query_two_array[1]);
+					ext_one.put("textarea62",query_two_array[2]);
+					ext_one.put("textarea40",query_two_array[3]);
+					ext_one.put("textarea68",query_two_array[4]);
+					ext_one.put("textarea13",query_two_array[5]);
+					ext_one.put("textarea51",query_two_array[6]);
+					ext_one.put("textarea61",query_two_array[7]);
+					ext_one.put("textarea48",query_two_array[8]);
+					ext_one.put("textarea18",query_two_array[9]);
+					ext_one.put("textarea66",query_two_array[10]);
+					ext_one.put("textarea20",query_two_array[11]);
+					ext_one.put("textarea52",query_two_array[12]);
+					ext_one.put("textarea50",query_two_array[13]);
+					ext_one.put("textarea46",query_two_array[14]);
+					ext_one.put("textarea22",query_two_array[15]);
+					ext_one.put("RegularityofPayment",query_two_array[16]);
+					
+					
+					
+					fetch_all_combo_data.add(ext_one);
+					
+					LogMessages.statusLogSME.info("*** Data fetched of ext_1 table ***");
+					count++;
+				}
+				
+				while(ext_three_iteratior.hasNext())
+				{
+					List query_three_data=(List)ext_three_iteratior.next();
+					String[] query_three_array = new String[query_three_data.size()];
+					query_three_array = (String[]) query_three_data.toArray(query_three_array);
+					
+					JSONObject ext_two = new JSONObject();
+					ext_two.put("textarea23", query_three_array[0]);
+					ext_two.put("textarea24", query_three_array[1]);
+					ext_two.put("textarea25", query_three_array[2]);
+					ext_two.put("textarea26", query_three_array[3]);
+					ext_two.put("textarea27", query_three_array[4]);
+					ext_two.put("textarea28", query_three_array[5]);
+					ext_two.put("textarea30", query_three_array[6]);
+					ext_two.put("textarea31", query_three_array[7]);
+					ext_two.put("textarea32", query_three_array[8]);
+					ext_two.put("textarea33", query_three_array[9]);
+					ext_two.put("textarea34", query_three_array[10]);
+					ext_two.put("textarea35", query_three_array[11]);
+					ext_two.put("textarea36", query_three_array[12]);
+					ext_two.put("textarea37", query_three_array[13]);
+					ext_two.put("textarea42", query_three_array[14]);
+					ext_two.put("textarea41", query_three_array[15]);
+					ext_two.put("textarea17", query_three_array[16]);
+					
+					fetch_all_combo_data.add(ext_two);
+					
+					LogMessages.statusLogSME.info("*** Data fetched of ext_2 table ***");
+					count++;
+				}
+				
+				while(query_date_fetch_iteratior.hasNext())
+				{
+					List query_date_fetch_data=(List)query_date_fetch_iteratior.next();
+					String[] query_date_fetch_data_array=new String[query_date_fetch_data.size()];
+					query_date_fetch_data_array=(String[])query_date_fetch_data.toArray(query_date_fetch_data_array);
+					
+					
+					JSONObject date_data=new JSONObject();
+					date_data.put("DateOfValuationCIR",customDate(query_date_fetch_data_array[0]));
+					date_data.put("ApplicationDate",customDate(query_date_fetch_data_array[1]));
+					date_data.put("ExistingReviewDateLI",customDate(query_date_fetch_data_array[2]));
+					date_data.put("InsuranceExpiryDateID",customDate(query_date_fetch_data_array[3]));
+					date_data.put("CItizenshipIssueDatePD",customDate(query_date_fetch_data_array[4]));
+					date_data.put("PassportIssueDatePD",customDate(query_date_fetch_data_array[5]));
+					date_data.put("PassportExpiryDatePD",customDate(query_date_fetch_data_array[6]));
+					date_data.put("PanRegisterDatePD",customDate(query_date_fetch_data_array[7]));
+					date_data.put("OwnershipTransferDate",customDate(query_date_fetch_data_array[8]));
+					date_data.put("FirmRegisterExpiryDateBD",customDate(query_date_fetch_data_array[9]));
+					date_data.put("PanRegisterDateBD",customDate(query_date_fetch_data_array[10]));
+					date_data.put("AuditDateAR",customDate(query_date_fetch_data_array[11]));
+					date_data.put("ReviewPeriodTill",customDate(query_date_fetch_data_array[12]));
+					date_data.put("ReviewPeriodFrom",customDate(query_date_fetch_data_array[13]));
+					date_data.put("PanRegisterDateBD1",customDate(query_date_fetch_data_array[14]));
+					date_data.put("PYLatestValuationDateID",customDate(query_date_fetch_data_array[15]));
+					date_data.put("NextReviewDateLI",customDate(query_date_fetch_data_array[16]));
+					
+                    fetch_all_combo_data.add(date_data);
+					LogMessages.statusLogSME.info("*** Data fetched of data data ***");
+					count++;
+					
+				}
+				
+				while(dblinking_date_fetch_iteratior.hasNext())
+				{
+					List query_dblinking_fetch_data=(List)dblinking_date_fetch_iteratior.next();
+					String[] dblinking_fetch_data_array=new String[query_dblinking_fetch_data.size()];
+					dblinking_fetch_data_array=(String[])query_dblinking_fetch_data.toArray(dblinking_fetch_data_array);
+					
+					JSONObject dblinking_data=new JSONObject();
+					dblinking_data.put("FacilityStructureRiskFac", dblinking_fetch_data_array[0]);
+					LogMessages.statusLogSME.info("FacilityStructureRiskFac:" + dblinking_fetch_data_array[0]);
+					dblinking_data.put("IHaveEnquiredFamilyCIR", dblinking_fetch_data_array[1]);
+					LogMessages.statusLogSME.info("IHaveEnquiredFamilyCIR: " + dblinking_fetch_data_array[1]);
+					dblinking_data.put("VehicleEquipmentRegistrationNoID", dblinking_fetch_data_array[2]);
+					LogMessages.statusLogSME.info("VehicleEquipmentRegistrationNoID: " + dblinking_fetch_data_array[2]);
+					dblinking_data.put("ClientNamePD", dblinking_fetch_data_array[3]);
+					LogMessages.statusLogSME.info("ClientNamePD: " + dblinking_fetch_data_array[3]);
+					dblinking_data.put("NameOfKeyPersonLead", dblinking_fetch_data_array[4]);
+					LogMessages.statusLogSME.info("NameOfKeyPersonLead: " + dblinking_fetch_data_array[4]);
+					dblinking_data.put("KeyPersonContactNoLead", dblinking_fetch_data_array[5]);
+					LogMessages.statusLogSME.info("KeyPersonContactNoLead: " + dblinking_fetch_data_array[5]);
+					dblinking_data.put("Email", dblinking_fetch_data_array[6]);
+					LogMessages.statusLogSME.info("Email: " + dblinking_fetch_data_array[6]);
+					dblinking_data.put("ExperienceYears", dblinking_fetch_data_array[7]);
+					LogMessages.statusLogSME.info("ExperienceYears: " + dblinking_fetch_data_array[7]);
+					dblinking_data.put("ExperienceFieldPD", dblinking_fetch_data_array[8]);
+					LogMessages.statusLogSME.info("ExperienceFieldPD: " + dblinking_fetch_data_array[8]);
+					dblinking_data.put("FundedAmountLead", dblinking_fetch_data_array[9]);
+					LogMessages.statusLogSME.info("FundedAmountLead: " + dblinking_fetch_data_array[9]);
+					dblinking_data.put("NonFundedAmountLead", dblinking_fetch_data_array[10]);
+					LogMessages.statusLogSME.info("NonFundedAmountLead: " + dblinking_fetch_data_array[10]);
+					dblinking_data.put("FinishedGoodsBSIR", dblinking_fetch_data_array[11]);
+					LogMessages.statusLogSME.info("FinishedGoodsBSIR: " + dblinking_fetch_data_array[11]);
+					dblinking_data.put("LessForCollateralCaseCIR", dblinking_fetch_data_array[12]);
+					LogMessages.statusLogSME.info("LessForCollateralCaseCIR: " + dblinking_fetch_data_array[12]);
+					dblinking_data.put("Limit", dblinking_fetch_data_array[13]);
+					LogMessages.statusLogSME.info("Limit: " + dblinking_fetch_data_array[13]);
+					dblinking_data.put("NetWorthGuarantor", dblinking_fetch_data_array[14]);
+					LogMessages.statusLogSME.info("NetWorthGuarantor: " + dblinking_fetch_data_array[14]);
+					dblinking_data.put("MobileNoo", dblinking_fetch_data_array[15]);
+					LogMessages.statusLogSME.info("MobileNoo: " + dblinking_fetch_data_array[15]);
+					dblinking_data.put("ClientAcNo", dblinking_fetch_data_array[16]);
+					LogMessages.statusLogSME.info("ClientAcNo: " + dblinking_fetch_data_array[16]);
+					dblinking_data.put("ExistingCreditGradeLI", dblinking_fetch_data_array[17]);
+					LogMessages.statusLogSME.info("ExistingCreditGradeLI: " + dblinking_fetch_data_array[17]);
+					dblinking_data.put("ProposedCreditGradeLI", dblinking_fetch_data_array[18]);
+					LogMessages.statusLogSME.info("ProposedCreditGradeLI: " + dblinking_fetch_data_array[18]);
+					dblinking_data.put("CreditScoreLI", dblinking_fetch_data_array[19]);
+					LogMessages.statusLogSME.info("CreditScoreLI: " + dblinking_fetch_data_array[19]);
+					dblinking_data.put("PermitNoIndianEmbassyPD", dblinking_fetch_data_array[20]);
+					LogMessages.statusLogSME.info("PermitNoIndianEmbassyPD: " + dblinking_fetch_data_array[20]);
+					dblinking_data.put("SwappingBankLI", dblinking_fetch_data_array[21]);
+					LogMessages.statusLogSME.info("SwappingBankLI: " + dblinking_fetch_data_array[21]);
+					dblinking_data.put("CommitmentFee", dblinking_fetch_data_array[22]);
+					LogMessages.statusLogSME.info("CommitmentFee: " + dblinking_fetch_data_array[22]);
+					dblinking_data.put("DateOfBirthPD", dblinking_fetch_data_array[23]);
+					LogMessages.statusLogSME.info("DateOfBirthPD: " + dblinking_fetch_data_array[23]);
+					dblinking_data.put("IfNotCommentCIR", dblinking_fetch_data_array[24]);
+					LogMessages.statusLogSME.info("IfNotCommentCIR: " + dblinking_fetch_data_array[24]);
+					dblinking_data.put("InsuredAssetsID", dblinking_fetch_data_array[25]);
+					LogMessages.statusLogSME.info("InsuredAssetsID: " + dblinking_fetch_data_array[25]);
+					dblinking_data.put("HELatestValuationDateID", dblinking_fetch_data_array[26]);
+					LogMessages.statusLogSME.info("HELatestValuationDateID: " + dblinking_fetch_data_array[26]);
+					dblinking_data.put("VDCMunicipalityCIBInd", dblinking_fetch_data_array[27]);
+					LogMessages.statusLogSME.info("VDCMunicipalityCIBInd: " + dblinking_fetch_data_array[27]);
+					dblinking_data.put("AgeBusinessBD", dblinking_fetch_data_array[28]);
+					LogMessages.statusLogSME.info("AgeBusinessBD: " + dblinking_fetch_data_array[28]);
+					dblinking_data.put("BusinessIncorporationBD", dblinking_fetch_data_array[29]);
+					LogMessages.statusLogSME.info("BusinessIncorporationBD: " + dblinking_fetch_data_array[29]);
+					dblinking_data.put("BankNameBD", dblinking_fetch_data_array[30]);
+					LogMessages.statusLogSME.info("BankNameBD: " + dblinking_fetch_data_array[30]);
+					dblinking_data.put("LoanLimitBD", dblinking_fetch_data_array[31]);
+					LogMessages.statusLogSME.info("LoanLimitBD: " + dblinking_fetch_data_array[31]);
+					dblinking_data.put("OutstandingAmountBD", dblinking_fetch_data_array[32]);
+					LogMessages.statusLogSME.info("OutstandingAmountBD: " + dblinking_fetch_data_array[32]);
+					dblinking_data.put("OverDueAmountBD", dblinking_fetch_data_array[33]);
+					LogMessages.statusLogSME.info("OverDueAmountBD: " + dblinking_fetch_data_array[33]);
+					dblinking_data.put("EmailPD", dblinking_fetch_data_array[34]);
+					LogMessages.statusLogSME.info("EmailPD: " + dblinking_fetch_data_array[34]);
+					dblinking_data.put("ContactNoMonthlyPD", dblinking_fetch_data_array[35]);
+					LogMessages.statusLogSME.info("ContactNoMonthlyPD: " + dblinking_fetch_data_array[35]);
+					dblinking_data.put("ExistingTotalFund", dblinking_fetch_data_array[36]);
+					LogMessages.statusLogSME.info("ExistingTotalFund: " + dblinking_fetch_data_array[36]);
+					dblinking_data.put("TotalFundFacility", dblinking_fetch_data_array[37]);
+					LogMessages.statusLogSME.info("TotalFundFacility: " + dblinking_fetch_data_array[37]);
+					dblinking_data.put("TotalFmvBuildingCIR", dblinking_fetch_data_array[38]);
+					LogMessages.statusLogSME.info("TotalFmvBuildingCIR: " + dblinking_fetch_data_array[38]);
+					dblinking_data.put("ExistingTotalNonFund", dblinking_fetch_data_array[39]);
+					LogMessages.statusLogSME.info("ExistingTotalNonFund: " + dblinking_fetch_data_array[39]);
+					dblinking_data.put("TotalNonFundFacility", dblinking_fetch_data_array[40]);
+					LogMessages.statusLogSME.info("TotalNonFundFacility: " + dblinking_fetch_data_array[40]);
+					dblinking_data.put("TotalAssetGuarantor", dblinking_fetch_data_array[41]);
+					LogMessages.statusLogSME.info("TotalAssetGuarantor: " + dblinking_fetch_data_array[41]);
+					dblinking_data.put("ExistingTotalLimit", dblinking_fetch_data_array[42]);
+					LogMessages.statusLogSME.info("ExistingTotalLimit: " + dblinking_fetch_data_array[42]);
+					dblinking_data.put("TotalLimitFacility", dblinking_fetch_data_array[43]);
+					LogMessages.statusLogSME.info("TotalLimitFacility: " + dblinking_fetch_data_array[43]);
+					dblinking_data.put("StoreSparesBSIR", dblinking_fetch_data_array[44]);
+					LogMessages.statusLogSME.info("StoreSparesBSIR: " + dblinking_fetch_data_array[44]);
+					dblinking_data.put("ExistingTotalGroup", dblinking_fetch_data_array[45]);
+					LogMessages.statusLogSME.info("ExistingTotalGroup: " + dblinking_fetch_data_array[45]);
+					dblinking_data.put("StockTransitBSIR", dblinking_fetch_data_array[46]);
+					LogMessages.statusLogSME.info("StockTransitBSIR: " + dblinking_fetch_data_array[46]);
+					dblinking_data.put("ShareholdingAmountBD", dblinking_fetch_data_array[47]);
+					LogMessages.statusLogSME.info("ShareholdingAmountBD: " + dblinking_fetch_data_array[47]);
+					dblinking_data.put("AdvancesCustomersBSIR", dblinking_fetch_data_array[48]);
+					LogMessages.statusLogSME.info("AdvancesCustomersBSIR: " + dblinking_fetch_data_array[48]);
+					dblinking_data.put("AdvancesSuppliersBSIR", dblinking_fetch_data_array[49]);
+					LogMessages.statusLogSME.info("AdvancesSuppliersBSIR: " + dblinking_fetch_data_array[49]);
+					dblinking_data.put("ApprovedLimit", dblinking_fetch_data_array[50]);
+					LogMessages.statusLogSME.info("ApprovedLimit: " + dblinking_fetch_data_array[50]);
+					dblinking_data.put("CreditorsBSIR", dblinking_fetch_data_array[51]);
+					LogMessages.statusLogSME.info("CreditorsBSIR: " + dblinking_fetch_data_array[51]);
+					dblinking_data.put("FMVSD", dblinking_fetch_data_array[52]);
+					LogMessages.statusLogSME.info("FMVSD: " + dblinking_fetch_data_array[52]);
+					dblinking_data.put("MortgageValueSD", dblinking_fetch_data_array[53]);
+					LogMessages.statusLogSME.info("MortgageValueSD: " + dblinking_fetch_data_array[53]);
+					dblinking_data.put("ExistingCCG", dblinking_fetch_data_array[54]);
+					LogMessages.statusLogSME.info("ExistingCCG: " + dblinking_fetch_data_array[54]);
+					dblinking_data.put("ContactPersonCIR", dblinking_fetch_data_array[55]);
+					LogMessages.statusLogSME.info("ContactPersonCIR: " + dblinking_fetch_data_array[55]);
+					dblinking_data.put("ContactNumberCIR", dblinking_fetch_data_array[56]);
+					LogMessages.statusLogSME.info("ContactNumberCIR: " + dblinking_fetch_data_array[56]);
+					dblinking_data.put("SCCollateralCoverageCIR", dblinking_fetch_data_array[57]);
+					LogMessages.statusLogSME.info("SCCollateralCoverageCIR: " + dblinking_fetch_data_array[57]);
+					dblinking_data.put("SCInCaseLnBCIR", dblinking_fetch_data_array[58]);
+					LogMessages.statusLogSME.info("SCInCaseLnBCIR: " + dblinking_fetch_data_array[58]);
+					dblinking_data.put("LTV_Value", dblinking_fetch_data_array[59]);
+					LogMessages.statusLogSME.info("LTV_Value: " + dblinking_fetch_data_array[59]);
+					dblinking_data.put("AORiskCoverageID", dblinking_fetch_data_array[60]);
+					LogMessages.statusLogSME.info("AORiskCoverageID: " + dblinking_fetch_data_array[60]);
+					dblinking_data.put("NameOfOwnerCIR", dblinking_fetch_data_array[61]);
+					LogMessages.statusLogSME.info("NameOfOwnerCIR: " + dblinking_fetch_data_array[61]);
+					dblinking_data.put("ExistingLimitFac", dblinking_fetch_data_array[62]);
+					LogMessages.statusLogSME.info("ExistingLimitFac: " + dblinking_fetch_data_array[62]);
+					dblinking_data.put("FundedAmountFac", dblinking_fetch_data_array[63]);
+					LogMessages.statusLogSME.info("FundedAmountFac: " + dblinking_fetch_data_array[63]);
+					dblinking_data.put("ConsistentBlueprintCIR", dblinking_fetch_data_array[64]);
+					LogMessages.statusLogSME.info("ConsistentBlueprintCIR: " + dblinking_fetch_data_array[64]);
+					dblinking_data.put("CovenantMonitoringFrequencyAR", dblinking_fetch_data_array[65]);
+					LogMessages.statusLogSME.info("CovenantMonitoringFrequencyAR: " + dblinking_fetch_data_array[65]);
+					dblinking_data.put("ESalesGrowthFin", dblinking_fetch_data_array[66]);
+					LogMessages.statusLogSME.info("ESalesGrowthFin: " + dblinking_fetch_data_array[66]);
+					dblinking_data.put("ENetProfitGrowthFin", dblinking_fetch_data_array[67]);
+					LogMessages.statusLogSME.info("ENetProfitGrowthFin: " + dblinking_fetch_data_array[67]);
+					dblinking_data.put("ECurrentRatioFin", dblinking_fetch_data_array[68]);
+					LogMessages.statusLogSME.info("ECurrentRatioFin: " + dblinking_fetch_data_array[68]);
+					dblinking_data.put("EInterestCoverageFin", dblinking_fetch_data_array[69]);
+					LogMessages.statusLogSME.info("EInterestCoverageFin: " + dblinking_fetch_data_array[69]);
+					dblinking_data.put("EDSCRFin", dblinking_fetch_data_array[70]);
+					LogMessages.statusLogSME.info("EDSCRFin: " + dblinking_fetch_data_array[70]);
+					dblinking_data.put("EDrawingPowerFin", dblinking_fetch_data_array[71]);
+					LogMessages.statusLogSME.info("EDrawingPowerFin: " + dblinking_fetch_data_array[71]);
+					dblinking_data.put("EGearingRatioFin", dblinking_fetch_data_array[72]);
+					LogMessages.statusLogSME.info("EGearingRatioFin: " + dblinking_fetch_data_array[72]);
+					dblinking_data.put("HEAddressOfClientID", dblinking_fetch_data_array[73]);
+					LogMessages.statusLogSME.info("HEAddressOfClientID: " + dblinking_fetch_data_array[73]);
+					dblinking_data.put("TypeOfConstructionCIR", dblinking_fetch_data_array[74]);
+					LogMessages.statusLogSME.info("TypeOfConstructionCIR: " + dblinking_fetch_data_array[74]);
+					dblinking_data.put("PlaceNameCIR", dblinking_fetch_data_array[75]);
+					LogMessages.statusLogSME.info("PlaceNameCIR: " + dblinking_fetch_data_array[75]);
+					dblinking_data.put("HENaksaPassID", dblinking_fetch_data_array[76]);
+					LogMessages.statusLogSME.info("HENaksaPassID: " + dblinking_fetch_data_array[76]);
+					dblinking_data.put("WardNoCollateralSecurity", dblinking_fetch_data_array[77]);
+					LogMessages.statusLogSME.info("WardNoCollateralSecurity: " + dblinking_fetch_data_array[77]);
+					dblinking_data.put("TotalLiabilityGuarantor", dblinking_fetch_data_array[78]);
+					LogMessages.statusLogSME.info("TotalLiabilityGuarantor: " + dblinking_fetch_data_array[78]);
+					dblinking_data.put("Telephone", dblinking_fetch_data_array[79]);
+					LogMessages.statusLogSME.info("Telephone: " + dblinking_fetch_data_array[79]);
+					dblinking_data.put("PYSumInsuredID", dblinking_fetch_data_array[80]);
+					LogMessages.statusLogSME.info("PYSumInsuredID: " + dblinking_fetch_data_array[80]);
+					dblinking_data.put("RoadAccessBlueprintCIR", dblinking_fetch_data_array[81]);
+					LogMessages.statusLogSME.info("RoadAccessBlueprintCIR: " + dblinking_fetch_data_array[81]);
+					dblinking_data.put("FundedOrNonfundedFac", dblinking_fetch_data_array[82]);
+					LogMessages.statusLogSME.info("FundedOrNonfundedFac: " + dblinking_fetch_data_array[82]);
+					dblinking_data.put("AccountGroupProfitability", dblinking_fetch_data_array[83]);
+					LogMessages.statusLogSME.info("AccountGroupProfitability: " + dblinking_fetch_data_array[83]);
+					dblinking_data.put("AccountStrategyAR", dblinking_fetch_data_array[84]);
+					LogMessages.statusLogSME.info("AccountStrategyAR: " + dblinking_fetch_data_array[84]);
+					dblinking_data.put("NameCIBInd", dblinking_fetch_data_array[85]);
+					LogMessages.statusLogSME.info("NameCIBInd: " + dblinking_fetch_data_array[85]);
+					dblinking_data.put("FatherNameCIBInd", dblinking_fetch_data_array[86]);
+					LogMessages.statusLogSME.info("FatherNameCIBInd: " + dblinking_fetch_data_array[86]);
+					dblinking_data.put("GenderCIBInd", dblinking_fetch_data_array[87]);
+					LogMessages.statusLogSME.info("GenderCIBInd: " + dblinking_fetch_data_array[87]);
+					dblinking_data.put("NationalityCIBInd", dblinking_fetch_data_array[88]);
+					LogMessages.statusLogSME.info("NationalityCIBInd: " + dblinking_fetch_data_array[88]);
+					dblinking_data.put("CitizenshipNoCIBInd", dblinking_fetch_data_array[89]);
+					LogMessages.statusLogSME.info("CitizenshipNoCIBInd: " + dblinking_fetch_data_array[89]);
+					dblinking_data.put("IndianEmbassyNoCIBInd", dblinking_fetch_data_array[90]);
+					LogMessages.statusLogSME.info("IndianEmbassyNoCIBInd: " + dblinking_fetch_data_array[90]);
+					dblinking_data.put("CitizenshipIssuedDistrictCIBInd", dblinking_fetch_data_array[91]);
+					LogMessages.statusLogSME.info("CitizenshipIssuedDistrictCIBInd: " + dblinking_fetch_data_array[91]);
+					dblinking_data.put("PYConstructionCompletionCertificateID", dblinking_fetch_data_array[92]);
+					LogMessages.statusLogSME.info("PYConstructionCompletionCertificateID: " + dblinking_fetch_data_array[92]);
+					dblinking_data.put("LoanAmountCIBInd", dblinking_fetch_data_array[93]);
+					LogMessages.statusLogSME.info("LoanAmountCIBInd: " + dblinking_fetch_data_array[93]);
+					dblinking_data.put("ProposalTypeCIBInst", dblinking_fetch_data_array[94]);
+					LogMessages.statusLogSME.info("ProposalTypeCIBInst: " + dblinking_fetch_data_array[94]);
+					dblinking_data.put("NameoftheCompanyCIBInst", dblinking_fetch_data_array[95]);
+					LogMessages.statusLogSME.info("NameoftheCompanyCIBInst: " + dblinking_fetch_data_array[95]);
+					dblinking_data.put("CompanyRegisterNoCIBInst", dblinking_fetch_data_array[96]);
+					LogMessages.statusLogSME.info("CompanyRegisterNoCIBInst: " + dblinking_fetch_data_array[96]);
+					dblinking_data.put("HENameOfBuildingOwnerID", dblinking_fetch_data_array[97]);
+					LogMessages.statusLogSME.info("HENameOfBuildingOwnerID: " + dblinking_fetch_data_array[97]);
+					dblinking_data.put("CompanyRegisteredOrganisation", dblinking_fetch_data_array[98]);
+					LogMessages.statusLogSME.info("CompanyRegisteredOrganisation: " + dblinking_fetch_data_array[98]);
+					dblinking_data.put("PANNumberCIBInst", dblinking_fetch_data_array[99]);
+					LogMessages.statusLogSME.info("PANNumberCIBInst: " + dblinking_fetch_data_array[99]);
+					dblinking_data.put("PYPlotNoWithAreaID", dblinking_fetch_data_array[100]);
+					LogMessages.statusLogSME.info("PYPlotNoWithAreaID: " + dblinking_fetch_data_array[100]);
+					dblinking_data.put("PANIssuedDistrictCIBInst", dblinking_fetch_data_array[101]);
+					LogMessages.statusLogSME.info("PANIssuedDistrictCIBInst: " + dblinking_fetch_data_array[101]);
+					dblinking_data.put("RegisteredAddressCIBInst", dblinking_fetch_data_array[102]);
+					LogMessages.statusLogSME.info("RegisteredAddressCIBInst: " + dblinking_fetch_data_array[102]);
+					dblinking_data.put("LoanAmountCIBInst", dblinking_fetch_data_array[103]);
+					LogMessages.statusLogSME.info("LoanAmountCIBInst: " + dblinking_fetch_data_array[103]);
+					dblinking_data.put("HERiskCoverageIsRSTMDRequiredID", dblinking_fetch_data_array[104]);
+					LogMessages.statusLogSME.info("HERiskCoverageIsRSTMDRequiredID: " + dblinking_fetch_data_array[104]);
+					dblinking_data.put("TotalAmountCIB", dblinking_fetch_data_array[105]);
+					LogMessages.statusLogSME.info("TotalAmountCIB: " + dblinking_fetch_data_array[105]);
+					dblinking_data.put("FatherNamePD", dblinking_fetch_data_array[106]);
+					LogMessages.statusLogSME.info("FatherNamePD: " + dblinking_fetch_data_array[106]);
+					dblinking_data.put("bankAcNo", dblinking_fetch_data_array[107]);
+					LogMessages.statusLogSME.info("bankAcNo: " + dblinking_fetch_data_array[107]);
+					dblinking_data.put("StatusCIB", dblinking_fetch_data_array[108]);
+					LogMessages.statusLogSME.info("StatusCIB: " + dblinking_fetch_data_array[108]);
+					dblinking_data.put("MotherNamePD", dblinking_fetch_data_array[109]);
+					LogMessages.statusLogSME.info("MotherNamePD: " + dblinking_fetch_data_array[109]);
+					dblinking_data.put("CitizenshipIssueDistrictPD1", dblinking_fetch_data_array[110]);
+					LogMessages.statusLogSME.info("CitizenshipIssueDistrictPD1: " + dblinking_fetch_data_array[110]);
+					dblinking_data.put("BackgroundGuarantorPD", dblinking_fetch_data_array[111]);
+					LogMessages.statusLogSME.info("BackgroundGuarantorPD: " + dblinking_fetch_data_array[111]);
+					dblinking_data.put("CitizenshipNoPD1", dblinking_fetch_data_array[112]);
+					LogMessages.statusLogSME.info("CitizenshipNoPD1: " + dblinking_fetch_data_array[112]);
+					dblinking_data.put("GrandfatherNamePD", dblinking_fetch_data_array[113]);
+					LogMessages.statusLogSME.info("GrandfatherNamePD: " + dblinking_fetch_data_array[113]);
+					dblinking_data.put("HENoOfStoreyID", dblinking_fetch_data_array[114]);
+					LogMessages.statusLogSME.info("HENoOfStoreyID: " + dblinking_fetch_data_array[114]);
+					dblinking_data.put("HEBranchSegmentID", dblinking_fetch_data_array[115]);
+					LogMessages.statusLogSME.info("HEBranchSegmentID: " + dblinking_fetch_data_array[115]);
+					dblinking_data.put("NotesFacilitySummaryFac", dblinking_fetch_data_array[116]);
+					LogMessages.statusLogSME.info("NotesFacilitySummaryFac: " + dblinking_fetch_data_array[116]);
+					dblinking_data.put("PYNameOfClientID", dblinking_fetch_data_array[117]);
+					LogMessages.statusLogSME.info("PYNameOfClientID: " + dblinking_fetch_data_array[117]);
+					dblinking_data.put("PropertyCIR", dblinking_fetch_data_array[118]);
+					LogMessages.statusLogSME.info("PropertyCIR: " + dblinking_fetch_data_array[118]);
+					dblinking_data.put("PanNoBD", dblinking_fetch_data_array[119]);
+					LogMessages.statusLogSME.info("PanNoBD: " + dblinking_fetch_data_array[119]);
+					dblinking_data.put("TypeOfSecurityFac", dblinking_fetch_data_array[120]);
+					LogMessages.statusLogSME.info("TypeOfSecurityFac: " + dblinking_fetch_data_array[120]);
+					dblinking_data.put("SectorBD", dblinking_fetch_data_array[121]);
+					LogMessages.statusLogSME.info("SectorBD: " + dblinking_fetch_data_array[121]);
+					dblinking_data.put("TypeofLoanCIBInd", dblinking_fetch_data_array[122]);
+					LogMessages.statusLogSME.info("TypeofLoanCIBInd: " + dblinking_fetch_data_array[122]);
+					dblinking_data.put("TypeCreditFacilities", dblinking_fetch_data_array[123]);
+					LogMessages.statusLogSME.info("TypeCreditFacilities: " + dblinking_fetch_data_array[123]);
+					dblinking_data.put("TypeOfAuditorAR", dblinking_fetch_data_array[124]);
+					LogMessages.statusLogSME.info("TypeOfAuditorAR: " + dblinking_fetch_data_array[124]);
+					dblinking_data.put("RelationToApplicant", dblinking_fetch_data_array[125]);
+					LogMessages.statusLogSME.info("RelationToApplicant: " + dblinking_fetch_data_array[125]);
+					dblinking_data.put("PanRegisterDistrictPD1", dblinking_fetch_data_array[126]);
+					LogMessages.statusLogSME.info("PanRegisterDistrictPD1: " + dblinking_fetch_data_array[126]);
+					dblinking_data.put("ModelNameID", dblinking_fetch_data_array[127]);
+					LogMessages.statusLogSME.info("ModelNameID: " + dblinking_fetch_data_array[127]);
+					dblinking_data.put("RiskCoverageID", dblinking_fetch_data_array[128]);
+					LogMessages.statusLogSME.info("RiskCoverageID: " + dblinking_fetch_data_array[128]);
+					dblinking_data.put("Proposal_SWAP", dblinking_fetch_data_array[129]);
+					LogMessages.statusLogSME.info("Proposal_SWAP: " + dblinking_fetch_data_array[129]);
+					dblinking_data.put("ShapeOfLandCIR", dblinking_fetch_data_array[130]);
+					LogMessages.statusLogSME.info("ShapeOfLandCIR: " + dblinking_fetch_data_array[130]);
+					dblinking_data.put("Age_Score", dblinking_fetch_data_array[131]);
+					LogMessages.statusLogSME.info("Age_Score: " + dblinking_fetch_data_array[131]);
+					dblinking_data.put("Experience_Score", dblinking_fetch_data_array[132]);
+					LogMessages.statusLogSME.info("Experience_Score: " + dblinking_fetch_data_array[132]);
+					dblinking_data.put("Ownership_Socre", dblinking_fetch_data_array[133]);
+					LogMessages.statusLogSME.info("Ownership_Socre: " + dblinking_fetch_data_array[133]);
+					dblinking_data.put("Loan_score", dblinking_fetch_data_array[134]);
+					LogMessages.statusLogSME.info("Loan_score: " + dblinking_fetch_data_array[134]);
+					dblinking_data.put("Relationship_Score", dblinking_fetch_data_array[135]);
+					LogMessages.statusLogSME.info("Relationship_Score: " + dblinking_fetch_data_array[135]);
+					dblinking_data.put("Client_ProfileTotal", dblinking_fetch_data_array[136]);
+					LogMessages.statusLogSME.info("Client_ProfileTotal: " + dblinking_fetch_data_array[136]);
+					dblinking_data.put("SoleMultiple_Score", dblinking_fetch_data_array[137]);
+					LogMessages.statusLogSME.info("SoleMultiple_Score: " + dblinking_fetch_data_array[137]);
+					dblinking_data.put("RelationExistingBank_Score", dblinking_fetch_data_array[138]);
+					LogMessages.statusLogSME.info("RelationExistingBank_Score: " + dblinking_fetch_data_array[138]);
+					dblinking_data.put("OccIrregularity_Score", dblinking_fetch_data_array[139]);
+					LogMessages.statusLogSME.info("OccIrregularity_Score: " + dblinking_fetch_data_array[139]);
+					dblinking_data.put("LastYearMax_Score", dblinking_fetch_data_array[140]);
+					LogMessages.statusLogSME.info("LastYearMax_Score: " + dblinking_fetch_data_array[140]);
+					dblinking_data.put("CIC_Score", dblinking_fetch_data_array[141]);
+					LogMessages.statusLogSME.info("CIC_Score: " + dblinking_fetch_data_array[141]);
+					dblinking_data.put("BankingHistory_TotalScore", dblinking_fetch_data_array[142]);
+					LogMessages.statusLogSME.info("BankingHistory_TotalScore: " + dblinking_fetch_data_array[142]);
+					dblinking_data.put("AgeBusiness_Score", dblinking_fetch_data_array[143]);
+					LogMessages.statusLogSME.info("AgeBusiness_Score: " + dblinking_fetch_data_array[143]);
+					dblinking_data.put("BusinessIncorporation_Score", dblinking_fetch_data_array[144]);
+					LogMessages.statusLogSME.info("BusinessIncorporation_Score: " + dblinking_fetch_data_array[144]);
+					dblinking_data.put("SalesTurnOver_Score", dblinking_fetch_data_array[145]);
+					LogMessages.statusLogSME.info("SalesTurnOver_Score: " + dblinking_fetch_data_array[145]);
+					dblinking_data.put("BusinessProfile_TotalScore", dblinking_fetch_data_array[146]);
+					LogMessages.statusLogSME.info("BusinessProfile_TotalScore: " + dblinking_fetch_data_array[146]);
+					dblinking_data.put("SalesGrowth_Score", dblinking_fetch_data_array[147]);
+					LogMessages.statusLogSME.info("SalesGrowth_Score: " + dblinking_fetch_data_array[147]);
+					dblinking_data.put("NetProfit_Score", dblinking_fetch_data_array[148]);
+					LogMessages.statusLogSME.info("NetProfit_Score: " + dblinking_fetch_data_array[148]);
+					dblinking_data.put("CurrentRatio_Score", dblinking_fetch_data_array[149]);
+					LogMessages.statusLogSME.info("CurrentRatio_Score: " + dblinking_fetch_data_array[149]);
+					dblinking_data.put("InterestCoverage_Score", dblinking_fetch_data_array[150]);
+					LogMessages.statusLogSME.info("InterestCoverage_Score: " + dblinking_fetch_data_array[150]);
+					dblinking_data.put("DSCR_Score", dblinking_fetch_data_array[151]);
+					LogMessages.statusLogSME.info("DSCR_Score: " + dblinking_fetch_data_array[151]);
+					dblinking_data.put("DrawingPower_Score", dblinking_fetch_data_array[152]);
+					LogMessages.statusLogSME.info("DrawingPower_Score: " + dblinking_fetch_data_array[152]);
+					dblinking_data.put("GearingRatio", dblinking_fetch_data_array[153]);
+					LogMessages.statusLogSME.info("GearingRatio: " + dblinking_fetch_data_array[153]);
+					dblinking_data.put("FinancialHealth_TotalScore", dblinking_fetch_data_array[154]);
+					LogMessages.statusLogSME.info("FinancialHealth_TotalScore: " + dblinking_fetch_data_array[154]);
+					dblinking_data.put("Location_Score", dblinking_fetch_data_array[155]);
+					LogMessages.statusLogSME.info("Location_Score: " + dblinking_fetch_data_array[155]);
+					dblinking_data.put("RoadWidth_Score", dblinking_fetch_data_array[156]);
+					LogMessages.statusLogSME.info("RoadWidth_Score: " + dblinking_fetch_data_array[156]);
+					dblinking_data.put("PropertyType_Score", dblinking_fetch_data_array[157]);
+					LogMessages.statusLogSME.info("PropertyType_Score: " + dblinking_fetch_data_array[157]);
+					dblinking_data.put("RoadAccess_Score", dblinking_fetch_data_array[158]);
+					LogMessages.statusLogSME.info("RoadAccess_Score: " + dblinking_fetch_data_array[158]);
+					dblinking_data.put("NetDeduction_Score", dblinking_fetch_data_array[159]);
+					LogMessages.statusLogSME.info("NetDeduction_Score: " + dblinking_fetch_data_array[159]);
+					dblinking_data.put("InCaseLnB_Score", dblinking_fetch_data_array[160]);
+					LogMessages.statusLogSME.info("InCaseLnB_Score: " + dblinking_fetch_data_array[160]);
+					dblinking_data.put("SixParameter", dblinking_fetch_data_array[161]);
+					LogMessages.statusLogSME.info("SixParameter: " + dblinking_fetch_data_array[161]);
+					dblinking_data.put("POI", dblinking_fetch_data_array[162]);
+					LogMessages.statusLogSME.info("POI: " + dblinking_fetch_data_array[162]);
+					dblinking_data.put("CollateralCoverage_Score", dblinking_fetch_data_array[163]);
+					LogMessages.statusLogSME.info("CollateralCoverage_Score: " + dblinking_fetch_data_array[163]);
+					dblinking_data.put("POI1", dblinking_fetch_data_array[164]);
+					LogMessages.statusLogSME.info("POI1: " + dblinking_fetch_data_array[164]);
+					dblinking_data.put("CollateralDetails_TotalScore", dblinking_fetch_data_array[165]);
+					LogMessages.statusLogSME.info("CollateralDetails_TotalScore: " + dblinking_fetch_data_array[165]);
+					dblinking_data.put("POITotal", dblinking_fetch_data_array[166]);
+					LogMessages.statusLogSME.info("POITotal: " + dblinking_fetch_data_array[166]);
+					dblinking_data.put("WS_ClientProfile", dblinking_fetch_data_array[167]);
+					LogMessages.statusLogSME.info("WS_ClientProfile: " + dblinking_fetch_data_array[167]);
+					dblinking_data.put("PS_ClientProfile", dblinking_fetch_data_array[168]);
+					LogMessages.statusLogSME.info("PS_ClientProfile: " + dblinking_fetch_data_array[168]);
+					dblinking_data.put("WS_BankingHistory", dblinking_fetch_data_array[169]);
+					LogMessages.statusLogSME.info("WS_BankingHistory: " + dblinking_fetch_data_array[169]);
+					dblinking_data.put("PS_BankingHistory", dblinking_fetch_data_array[170]);
+					LogMessages.statusLogSME.info("PS_BankingHistory: " + dblinking_fetch_data_array[170]);
+					dblinking_data.put("WS_LandedCollateral", dblinking_fetch_data_array[171]);
+					LogMessages.statusLogSME.info("WS_LandedCollateral: " + dblinking_fetch_data_array[171]);
+					dblinking_data.put("PS_LandedCollateral", dblinking_fetch_data_array[172]);
+					LogMessages.statusLogSME.info("PS_LandedCollateral: " + dblinking_fetch_data_array[172]);
+					dblinking_data.put("WS_BusinessProfile", dblinking_fetch_data_array[173]);
+					LogMessages.statusLogSME.info("WS_BusinessProfile: " + dblinking_fetch_data_array[173]);
+					dblinking_data.put("PS_BusinessProfile", dblinking_fetch_data_array[174]);
+					LogMessages.statusLogSME.info("PS_BusinessProfile: " + dblinking_fetch_data_array[174]);
+					dblinking_data.put("WS_FinancialHealth", dblinking_fetch_data_array[175]);
+					LogMessages.statusLogSME.info("WS_FinancialHealth: " + dblinking_fetch_data_array[175]);
+					dblinking_data.put("PS_FinancialHealth", dblinking_fetch_data_array[176]);
+					LogMessages.statusLogSME.info("PS_FinancialHealth: " + dblinking_fetch_data_array[176]);
+					dblinking_data.put("RG_TotalScore", dblinking_fetch_data_array[177]);
+					LogMessages.statusLogSME.info("RG_TotalScore: " + dblinking_fetch_data_array[177]);
+					dblinking_data.put("InnerOfFac", dblinking_fetch_data_array[178]);
+					LogMessages.statusLogSME.info("InnerOfFac: " + dblinking_fetch_data_array[178]);
+					dblinking_data.put("IndustryMarketRiskBD", dblinking_fetch_data_array[179]);
+					LogMessages.statusLogSME.info("IndustryMarketRiskBD: " + dblinking_fetch_data_array[179]);
+					dblinking_data.put("RegisterAddressBD", dblinking_fetch_data_array[180]);
+					LogMessages.statusLogSME.info("RegisterAddressBD: " + dblinking_fetch_data_array[180]);
+					dblinking_data.put("ProductiveSubSectorBD", dblinking_fetch_data_array[181]);
+					LogMessages.statusLogSME.info("ProductiveSubSectorBD: " + dblinking_fetch_data_array[181]);
+					dblinking_data.put("PanRegisterDistrictBD1", dblinking_fetch_data_array[182]);
+					LogMessages.statusLogSME.info("PanRegisterDistrictBD1: " + dblinking_fetch_data_array[182]);
+					dblinking_data.put("GroupNameBD", dblinking_fetch_data_array[183]);
+					LogMessages.statusLogSME.info("GroupNameBD: " + dblinking_fetch_data_array[183]);
+					dblinking_data.put("GeneralInfoWS", dblinking_fetch_data_array[184]);
+					LogMessages.statusLogSME.info("GeneralInfoWS: " + dblinking_fetch_data_array[184]);
+					dblinking_data.put("GeneralInfoPS", dblinking_fetch_data_array[185]);
+					LogMessages.statusLogSME.info("GeneralInfoPS: " + dblinking_fetch_data_array[185]);
+					dblinking_data.put("GeneralInfoW1", dblinking_fetch_data_array[186]);
+					LogMessages.statusLogSME.info("GeneralInfoW1: " + dblinking_fetch_data_array[186]);
+					dblinking_data.put("VehicleWS", dblinking_fetch_data_array[187]);
+					LogMessages.statusLogSME.info("VehicleWS: " + dblinking_fetch_data_array[187]);
+					dblinking_data.put("VehiclePS", dblinking_fetch_data_array[188]);
+					LogMessages.statusLogSME.info("VehiclePS: " + dblinking_fetch_data_array[188]);
+					dblinking_data.put("VehicleW1", dblinking_fetch_data_array[189]);
+					LogMessages.statusLogSME.info("VehicleW1: " + dblinking_fetch_data_array[189]);
+					dblinking_data.put("IncomeWS", dblinking_fetch_data_array[190]);
+					LogMessages.statusLogSME.info("IncomeWS: " + dblinking_fetch_data_array[190]);
+					dblinking_data.put("IncomePS", dblinking_fetch_data_array[191]);
+					LogMessages.statusLogSME.info("IncomePS: " + dblinking_fetch_data_array[191]);
+					dblinking_data.put("IncomeW1", dblinking_fetch_data_array[192]);
+					LogMessages.statusLogSME.info("IncomeW1: " + dblinking_fetch_data_array[192]);
+					dblinking_data.put("NDIRatioWS", dblinking_fetch_data_array[193]);
+					LogMessages.statusLogSME.info("NDIRatioWS: " + dblinking_fetch_data_array[193]);
+					dblinking_data.put("NDIRatioPS", dblinking_fetch_data_array[194]);
+					LogMessages.statusLogSME.info("NDIRatioPS: " + dblinking_fetch_data_array[194]);
+					dblinking_data.put("NDIRatioW1", dblinking_fetch_data_array[195]);
+					LogMessages.statusLogSME.info("NDIRatioW1: " + dblinking_fetch_data_array[195]);
+					dblinking_data.put("TotalScoreWS", dblinking_fetch_data_array[196]);
+					LogMessages.statusLogSME.info("TotalScoreWS: " + dblinking_fetch_data_array[196]);
+					dblinking_data.put("AgeSponsorScore", dblinking_fetch_data_array[197]);
+					LogMessages.statusLogSME.info("AgeSponsorScore: " + dblinking_fetch_data_array[197]);
+					dblinking_data.put("RemarksAL1", dblinking_fetch_data_array[198]);
+					LogMessages.statusLogSME.info("RemarksAL1: " + dblinking_fetch_data_array[198]);
+					dblinking_data.put("RemarksAL2", dblinking_fetch_data_array[199]);
+					LogMessages.statusLogSME.info("RemarksAL2: " + dblinking_fetch_data_array[199]);
+					dblinking_data.put("RemarksAL3", dblinking_fetch_data_array[200]);
+					LogMessages.statusLogSME.info("RemarksAL3: " + dblinking_fetch_data_array[200]);
+					dblinking_data.put("RemarksAL4", dblinking_fetch_data_array[201]);
+					LogMessages.statusLogSME.info("RemarksAL4: " + dblinking_fetch_data_array[201]);
+					dblinking_data.put("RemarksAL", dblinking_fetch_data_array[202]);
+					LogMessages.statusLogSME.info("RemarksAL: " + dblinking_fetch_data_array[202]);
+					dblinking_data.put("TotalStockBSIR", dblinking_fetch_data_array[203]);
+					LogMessages.statusLogSME.info("TotalStockBSIR: " + dblinking_fetch_data_array[203]);
+					dblinking_data.put("RemarksAL6", dblinking_fetch_data_array[204]);
+					LogMessages.statusLogSME.info("RemarksAL6: " + dblinking_fetch_data_array[204]);
+					dblinking_data.put("RemarksAL7", dblinking_fetch_data_array[205]);
+					LogMessages.statusLogSME.info("RemarksAL7: " + dblinking_fetch_data_array[205]);
+					dblinking_data.put("UsageOfBuildingID", dblinking_fetch_data_array[206]);
+					LogMessages.statusLogSME.info("UsageOfBuildingID: " + dblinking_fetch_data_array[206]);
+					dblinking_data.put("RoadWidthCIR", dblinking_fetch_data_array[207]);
+					LogMessages.statusLogSME.info("RoadWidthCIR: " + dblinking_fetch_data_array[207]);
+					dblinking_data.put("PYItemNamesInCaseOfStockID", dblinking_fetch_data_array[208]);
+					LogMessages.statusLogSME.info("PYItemNamesInCaseOfStockID: " + dblinking_fetch_data_array[208]);
+					dblinking_data.put("PYAddressOfClientID", dblinking_fetch_data_array[209]);
+					LogMessages.statusLogSME.info("PYAddressOfClientID: " + dblinking_fetch_data_array[209]);
+					dblinking_data.put("ResidenceTelephoneNo", dblinking_fetch_data_array[210]);
+					LogMessages.statusLogSME.info("ResidenceTelephoneNo: " + dblinking_fetch_data_array[210]);
+					dblinking_data.put("ShareholderNameBD", dblinking_fetch_data_array[211]);
+					LogMessages.statusLogSME.info("ShareholderNameBD: " + dblinking_fetch_data_array[211]);
+					dblinking_data.put("Outstanding", dblinking_fetch_data_array[212]);
+					LogMessages.statusLogSME.info("Outstanding: " + dblinking_fetch_data_array[212]);
+					dblinking_data.put("AOAddressID", dblinking_fetch_data_array[213]);
+					LogMessages.statusLogSME.info("AOAddressID: " + dblinking_fetch_data_array[213]);
+					dblinking_data.put("Penal", dblinking_fetch_data_array[214]);
+					LogMessages.statusLogSME.info("Penal: " + dblinking_fetch_data_array[214]);
+					dblinking_data.put("DebtEquityRatio", dblinking_fetch_data_array[215]);
+					LogMessages.statusLogSME.info("DebtEquityRatio: " + dblinking_fetch_data_array[215]);
+					dblinking_data.put("InterestCoverRatio", dblinking_fetch_data_array[216]);
+					LogMessages.statusLogSME.info("InterestCoverRatio: " + dblinking_fetch_data_array[216]);
+					dblinking_data.put("ConstructionAsNaksaPassCIR", dblinking_fetch_data_array[217]);
+					LogMessages.statusLogSME.info("ConstructionAsNaksaPassCIR: " + dblinking_fetch_data_array[217]);
+					dblinking_data.put("AOSumInsuredID", dblinking_fetch_data_array[218]);
+					LogMessages.statusLogSME.info("AOSumInsuredID: " + dblinking_fetch_data_array[218]);
+					dblinking_data.put("AmountFac", dblinking_fetch_data_array[219]);
+					LogMessages.statusLogSME.info("AmountFac: " + dblinking_fetch_data_array[219]);
+					dblinking_data.put("CommisionsExistingFac", dblinking_fetch_data_array[220]);
+					LogMessages.statusLogSME.info("CommisionsExistingFac: " + dblinking_fetch_data_array[220]);
+					dblinking_data.put("HypothecationGoodsAmountCAC", dblinking_fetch_data_array[221]);
+					LogMessages.statusLogSME.info("HypothecationGoodsAmountCAC: " + dblinking_fetch_data_array[221]);
+					dblinking_data.put("ClientFirmAddress", dblinking_fetch_data_array[222]);
+					LogMessages.statusLogSME.info("ClientFirmAddress: " + dblinking_fetch_data_array[222]);
+					dblinking_data.put("MarketGoodsValueCAC", dblinking_fetch_data_array[223]);
+					LogMessages.statusLogSME.info("MarketGoodsValueCAC: " + dblinking_fetch_data_array[223]);
+					dblinking_data.put("BriefBusinessProfileBD", dblinking_fetch_data_array[224]);
+					LogMessages.statusLogSME.info("BriefBusinessProfileBD: " + dblinking_fetch_data_array[224]);
+					dblinking_data.put("CFLAmount", dblinking_fetch_data_array[225]);
+					LogMessages.statusLogSME.info("CFLAmount: " + dblinking_fetch_data_array[225]);
+					dblinking_data.put("LoanDeedAmount", dblinking_fetch_data_array[226]);
+					LogMessages.statusLogSME.info("LoanDeedAmount: " + dblinking_fetch_data_array[226]);
+					dblinking_data.put("AutoLoanDeedAmount", dblinking_fetch_data_array[227]);
+					LogMessages.statusLogSME.info("AutoLoanDeedAmount: " + dblinking_fetch_data_array[227]);
+					dblinking_data.put("ShareLoanDeedAmount", dblinking_fetch_data_array[228]);
+					LogMessages.statusLogSME.info("ShareLoanDeedAmount: " + dblinking_fetch_data_array[228]);
+					dblinking_data.put("DPNAmount", dblinking_fetch_data_array[229]);
+					LogMessages.statusLogSME.info("DPNAmount: " + dblinking_fetch_data_array[229]);
+					dblinking_data.put("PersonalGuaranteeAmount", dblinking_fetch_data_array[230]);
+					LogMessages.statusLogSME.info("PersonalGuaranteeAmount: " + dblinking_fetch_data_array[230]);
+					dblinking_data.put("CorporateGuaranteeAmount", dblinking_fetch_data_array[231]);
+					LogMessages.statusLogSME.info("CorporateGuaranteeAmount: " + dblinking_fetch_data_array[231]);
+					dblinking_data.put("GroupGuaranteeAmount", dblinking_fetch_data_array[232]);
+					LogMessages.statusLogSME.info("GroupGuaranteeAmount: " + dblinking_fetch_data_array[232]);
+					dblinking_data.put("ConsentOfRemAmount", dblinking_fetch_data_array[233]);
+					LogMessages.statusLogSME.info("ConsentOfRemAmount: " + dblinking_fetch_data_array[233]);
+					dblinking_data.put("AccountReceivableAmount", dblinking_fetch_data_array[234]);
+					LogMessages.statusLogSME.info("AccountReceivableAmount: " + dblinking_fetch_data_array[234]);
+					dblinking_data.put("HypoDeedStockAmount", dblinking_fetch_data_array[235]);
+					LogMessages.statusLogSME.info("HypoDeedStockAmount: " + dblinking_fetch_data_array[235]);
+					dblinking_data.put("HypoDeedFixAssetsAmount", dblinking_fetch_data_array[236]);
+					LogMessages.statusLogSME.info("HypoDeedFixAssetsAmount: " + dblinking_fetch_data_array[236]);
+					dblinking_data.put("PledgeDeedAmount", dblinking_fetch_data_array[237]);
+					LogMessages.statusLogSME.info("PledgeDeedAmount: " + dblinking_fetch_data_array[237]);
+					dblinking_data.put("ParipassuDeedAmount", dblinking_fetch_data_array[238]);
+					LogMessages.statusLogSME.info("ParipassuDeedAmount: " + dblinking_fetch_data_array[238]);
+					dblinking_data.put("NoObjectionLetterAmount", dblinking_fetch_data_array[239]);
+					LogMessages.statusLogSME.info("NoObjectionLetterAmount: " + dblinking_fetch_data_array[239]);
+					dblinking_data.put("ValuationReportAmount", dblinking_fetch_data_array[240]);
+					LogMessages.statusLogSME.info("ValuationReportAmount: " + dblinking_fetch_data_array[240]);
+					dblinking_data.put("RevaluationReportAmount", dblinking_fetch_data_array[241]);
+					LogMessages.statusLogSME.info("RevaluationReportAmount: " + dblinking_fetch_data_array[241]);
+					dblinking_data.put("MortgageDeedAmount", dblinking_fetch_data_array[242]);
+					LogMessages.statusLogSME.info("MortgageDeedAmount: " + dblinking_fetch_data_array[242]);
+					dblinking_data.put("RokkaLetterAmount", dblinking_fetch_data_array[243]);
+					LogMessages.statusLogSME.info("RokkaLetterAmount: " + dblinking_fetch_data_array[243]);
+					dblinking_data.put("LalpurjaAmount", dblinking_fetch_data_array[244]);
+					LogMessages.statusLogSME.info("LalpurjaAmount: " + dblinking_fetch_data_array[244]);
+					dblinking_data.put("ConsentLegalHeirAmount", dblinking_fetch_data_array[245]);
+					LogMessages.statusLogSME.info("ConsentLegalHeirAmount: " + dblinking_fetch_data_array[245]);
+					dblinking_data.put("RajnimaPaperAmount", dblinking_fetch_data_array[246]);
+					LogMessages.statusLogSME.info("RajnimaPaperAmount: " + dblinking_fetch_data_array[246]);
+					dblinking_data.put("RemortgageDeedAmount", dblinking_fetch_data_array[247]);
+					LogMessages.statusLogSME.info("RemortgageDeedAmount: " + dblinking_fetch_data_array[247]);
+					dblinking_data.put("SimpleRokkaAmount", dblinking_fetch_data_array[248]);
+					LogMessages.statusLogSME.info("SimpleRokkaAmount: " + dblinking_fetch_data_array[248]);
+					dblinking_data.put("InternalDeedAmount", dblinking_fetch_data_array[249]);
+					LogMessages.statusLogSME.info("InternalDeedAmount: " + dblinking_fetch_data_array[249]);
+					dblinking_data.put("TripartyAgreementAmount", dblinking_fetch_data_array[250]);
+					LogMessages.statusLogSME.info("TripartyAgreementAmount: " + dblinking_fetch_data_array[250]);
+					dblinking_data.put("StopSupplyAmount", dblinking_fetch_data_array[251]);
+					LogMessages.statusLogSME.info("StopSupplyAmount: " + dblinking_fetch_data_array[251]);
+					dblinking_data.put("CibReportAmount", dblinking_fetch_data_array[252]);
+					LogMessages.statusLogSME.info("CibReportAmount: " + dblinking_fetch_data_array[252]);
+					dblinking_data.put("CibClearanceAmount", dblinking_fetch_data_array[253]);
+					LogMessages.statusLogSME.info("CibClearanceAmount: " + dblinking_fetch_data_array[253]);
+					dblinking_data.put("StrAmount", dblinking_fetch_data_array[254]);
+					LogMessages.statusLogSME.info("StrAmount: " + dblinking_fetch_data_array[254]);
+					dblinking_data.put("InsuranceStockAmount", dblinking_fetch_data_array[255]);
+					LogMessages.statusLogSME.info("InsuranceStockAmount: " + dblinking_fetch_data_array[255]);
+					dblinking_data.put("InsuranceBuildingAmount", dblinking_fetch_data_array[256]);
+					LogMessages.statusLogSME.info("InsuranceBuildingAmount: " + dblinking_fetch_data_array[256]);
+					dblinking_data.put("InsurancePlantAmount", dblinking_fetch_data_array[257]);
+					LogMessages.statusLogSME.info("InsurancePlantAmount: " + dblinking_fetch_data_array[257]);
+					dblinking_data.put("InsuranceVehicleAmount", dblinking_fetch_data_array[258]);
+					LogMessages.statusLogSME.info("InsuranceVehicleAmount: " + dblinking_fetch_data_array[258]);
+					dblinking_data.put("InsuranceStockPoltryAmount", dblinking_fetch_data_array[259]);
+					LogMessages.statusLogSME.info("InsuranceStockPoltryAmount: " + dblinking_fetch_data_array[259]);
+					dblinking_data.put("TermLifeInsuranceAmount", dblinking_fetch_data_array[260]);
+					LogMessages.statusLogSME.info("TermLifeInsuranceAmount: " + dblinking_fetch_data_array[260]);
+					dblinking_data.put("ManjurnimaYatayatAmount", dblinking_fetch_data_array[261]);
+					LogMessages.statusLogSME.info("ManjurnimaYatayatAmount: " + dblinking_fetch_data_array[261]);
+					dblinking_data.put("ManjurinimaToBankAmount", dblinking_fetch_data_array[262]);
+					LogMessages.statusLogSME.info("ManjurinimaToBankAmount: " + dblinking_fetch_data_array[262]);
+					dblinking_data.put("InvoiceValuationAmount", dblinking_fetch_data_array[263]);
+					LogMessages.statusLogSME.info("InvoiceValuationAmount: " + dblinking_fetch_data_array[263]);
+					dblinking_data.put("RequestLetterAmount", dblinking_fetch_data_array[264]);
+					LogMessages.statusLogSME.info("RequestLetterAmount: " + dblinking_fetch_data_array[264]);
+					dblinking_data.put("SharePledgeAmount", dblinking_fetch_data_array[265]);
+					LogMessages.statusLogSME.info("SharePledgeAmount: " + dblinking_fetch_data_array[265]);
+					dblinking_data.put("DISAmount", dblinking_fetch_data_array[266]);
+					LogMessages.statusLogSME.info("DISAmount: " + dblinking_fetch_data_array[266]);
+					dblinking_data.put("UndertakingLetterAmount", dblinking_fetch_data_array[267]);
+					LogMessages.statusLogSME.info("UndertakingLetterAmount: " + dblinking_fetch_data_array[267]);
+					dblinking_data.put("CommitmentLetterAmount", dblinking_fetch_data_array[268]);
+					LogMessages.statusLogSME.info("CommitmentLetterAmount: " + dblinking_fetch_data_array[268]);
+					dblinking_data.put("LoanOutstandingAmount", dblinking_fetch_data_array[269]);
+					LogMessages.statusLogSME.info("LoanOutstandingAmount: " + dblinking_fetch_data_array[269]);
+					dblinking_data.put("PassCategoryAmount", dblinking_fetch_data_array[270]);
+					LogMessages.statusLogSME.info("PassCategoryAmount: " + dblinking_fetch_data_array[270]);
+					dblinking_data.put("NcaPositionAmount", dblinking_fetch_data_array[271]);
+					LogMessages.statusLogSME.info("NcaPositionAmount: " + dblinking_fetch_data_array[271]);
+					dblinking_data.put("TransactionTemplateAmount", dblinking_fetch_data_array[272]);
+					LogMessages.statusLogSME.info("TransactionTemplateAmount: " + dblinking_fetch_data_array[272]);
+					dblinking_data.put("OthersAmount", dblinking_fetch_data_array[273]);
+					LogMessages.statusLogSME.info("OthersAmount: " + dblinking_fetch_data_array[272]);
+					dblinking_data.put("EnvironmentalSocioRiskBD", dblinking_fetch_data_array[274]);
+					LogMessages.statusLogSME.info("EnvironmentalSocioRiskBD: " + dblinking_fetch_data_array[274]);
+					dblinking_data.put("CommentsComment", dblinking_fetch_data_array[275]);
+					LogMessages.statusLogSME.info("CommentsComment: " + dblinking_fetch_data_array[275]);
+					dblinking_data.put("TypeOfMeasurementCIR", dblinking_fetch_data_array[276]);
+					LogMessages.statusLogSME.info("TypeOfMeasurementCIR: " + dblinking_fetch_data_array[276]);
+					dblinking_data.put("TypeFac", dblinking_fetch_data_array[277]);
+					LogMessages.statusLogSME.info("TypeFac: " + dblinking_fetch_data_array[277]);
+					dblinking_data.put("StockSymbolSD", dblinking_fetch_data_array[278]);
+					LogMessages.statusLogSME.info("StockSymbolSD: " + dblinking_fetch_data_array[278]);
+					dblinking_data.put("StatusOfBuildingConsCIR", dblinking_fetch_data_array[279]);
+					LogMessages.statusLogSME.info("StatusOfBuildingConsCIR: " + dblinking_fetch_data_array[279]);
+					dblinking_data.put("TypeOfPropertyCIR", dblinking_fetch_data_array[280]);
+					LogMessages.statusLogSME.info("TypeOfPropertyCIR: " + dblinking_fetch_data_array[280]);
+					dblinking_data.put("BCCWaiversSH", dblinking_fetch_data_array[281]);
+					LogMessages.statusLogSME.info("BCCWaiversSH: " + dblinking_fetch_data_array[281]);
+					dblinking_data.put("RelationWithApplicantPD", dblinking_fetch_data_array[282]);
+					LogMessages.statusLogSME.info("RelationWithApplicantPD: " + dblinking_fetch_data_array[282]);
+					dblinking_data.put("AmountMentionTransfer", dblinking_fetch_data_array[283]);
+					LogMessages.statusLogSME.info("AmountMentionTransfer: " + dblinking_fetch_data_array[283]);
+					dblinking_data.put("OutstandingLimitFac", dblinking_fetch_data_array[284]);
+					LogMessages.statusLogSME.info("OutstandingLimitFac: " + dblinking_fetch_data_array[284]);
+					dblinking_data.put("GroupNamePD", dblinking_fetch_data_array[285]);
+					LogMessages.statusLogSME.info("GroupNamePD: " + dblinking_fetch_data_array[285]);
+					
+					dblinking_data.put("InspectedByBSIR", dblinking_fetch_data_array[286]);
+					LogMessages.statusLogSME.info("InspectedByBSIR: " + dblinking_fetch_data_array[286]);
+					
+					dblinking_data.put("IfNotCommentCIR", dblinking_fetch_data_array[287]);
+					LogMessages.statusLogSME.info("IfNotCommentCIR: " + dblinking_fetch_data_array[287]);
+					
+					dblinking_data.put("InsuredAssetsID", dblinking_fetch_data_array[288]);
+					LogMessages.statusLogSME.info("InsuredAssetsID: " + dblinking_fetch_data_array[288]);
+					dblinking_data.put("AccountConduct", dblinking_fetch_data_array[289]);
+					LogMessages.statusLogSME.info("AccountConduct: " + dblinking_fetch_data_array[289]);
+					
+					
+					
+					dblinking_data.put("AgeOfBusinessBD", dblinking_fetch_data_array[290]);
+					LogMessages.statusLogSME.info("AgeOfBusinessBD: " + dblinking_fetch_data_array[290]);
+					
+					dblinking_data.put("AgePD", dblinking_fetch_data_array[291]);
+					LogMessages.statusLogSME.info("AgePD: " + dblinking_fetch_data_array[291]);
+					
+					dblinking_data.put("LoanNetworthPD", dblinking_fetch_data_array[292]);
+					LogMessages.statusLogSME.info("LoanNetworthPD: " + dblinking_fetch_data_array[292]);
+					
+					dblinking_data.put("CurrentMarketPriceOfPublicSD", dblinking_fetch_data_array[293]);
+					LogMessages.statusLogSME.info("CurrentMarketPriceOfPublicSD: " + dblinking_fetch_data_array[293]);
+					
+					dblinking_data.put("CurrentMarketPriceOfPromotorSD", dblinking_fetch_data_array[294]);
+					LogMessages.statusLogSME.info("CurrentMarketPriceOfPromotorSD: " + dblinking_fetch_data_array[294]);
+					
+					dblinking_data.put("EmiLI", dblinking_fetch_data_array[295]);
+					LogMessages.statusLogSME.info("EmiLI: " + dblinking_fetch_data_array[295]);
+					
+					dblinking_data.put("CitizenshipIssueDatePD1", dblinking_fetch_data_array[296]);
+					LogMessages.statusLogSME.info("CitizenshipIssueDatePD1: " + dblinking_fetch_data_array[296]);
+					
+					dblinking_data.put("TotalAm", dblinking_fetch_data_array[297]);
+					LogMessages.statusLogSME.info("TotalAm: " + dblinking_fetch_data_array[297]);
+					
+					
+					
+
+					 fetch_all_combo_data.add(dblinking_data);
+					 LogMessages.statusLogSME.info("*** Data fetched of all external table ***");
+					 count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found fetch all combobox data", e);
+			}
+			
+			//for CS_EBA 
+			JSONArray jsonArray_eba = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select NameOfTheBank,Other,CreditFacilities,Limit,"+
+				"Outstanding,Remarks from CS_EBA where PID ='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Name of the Bank", itemsArray[0]);
+					obj.put("Other(Bank not in the list)", itemsArray[1]);
+					obj.put("Credit Facilities", itemsArray[2]);
+					obj.put("Limit", itemsArray[3]);
+					obj.put("Outstanding", itemsArray[4]);
+					obj.put("Remarks", itemsArray[5]);
+					jsonArray_eba.clear();
+					jsonArray_eba.add(obj);
+					
+					iFormObj.addDataToGrid("table51", jsonArray_eba);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found CS_EBA", e);
+			}
+			
+			//for CS_Networth
+			JSONArray jsonArray_networth = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select AssetType,AssetAmount,LiabilitiesType,LiabilitiesAmount,NetWorth from CS_Networth where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Asset Type", itemsArray[0]);
+					obj.put("Asset Amount", itemsArray[1]);
+					obj.put("Liabilities Type", itemsArray[2]);
+					obj.put("Liabilities Amount", itemsArray[3]);
+					obj.put("Net - Worth", itemsArray[4]);
+					
+					jsonArray_networth.clear();
+					jsonArray_networth.add(obj);
+					
+					iFormObj.addDataToGrid("table79", jsonArray_networth);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_NETWORTH"+e);
+			}
+			
+			//for CS_IndividualGuarantor
+			JSONArray jsonArray_IndividualGuarantor = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select GuarantorExistCustomer,AcNo,ClientName,ClientType,Age,DateofBirth,Citizenshipnumber,Citizenshipissueddate,Citizenshipissueddistrict,"
+						+ "	PermitNumberIndianEmbassy,Issuedatepermitnumber,Passportnumber,Passportissuingcountry,PassportissuedDate,"
+						+ "	PassportExpiryDate,PANregistrationdistrict,FatherName,FatherInLawName,"
+						+ "	MotherName,Grandfathername,Spousename,BackgroundofGuarantor,Assets,Laibilities,NetWorth,"
+						+ "	Gender,Nationality,VDCMunici,District,GrossIncome,RelationwithApplicant,ContactNo,"
+						+ "landandbuilding,Movableasset,Sharedeb,others,NMBloan,Otherbankloan,Otherliablity from CS_IndividualGuarantor where PID='"+pID+"'";
+				
+				
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Is Guarantor existing Customer?", itemsArray[0]);
+					obj.put("Account No", itemsArray[1]);
+					obj.put("Client Name", itemsArray[2]);
+					obj.put("Client Type", itemsArray[3]);
+					obj.put("Age", itemsArray[4]);
+					obj.put("Date of Birth", customDate(itemsArray[5]));
+					obj.put("Citizenship number", itemsArray[6]);
+					obj.put("Citizenship issued date", customDate(itemsArray[7]));
+					obj.put("Citizenship issued district", itemsArray[8]);
+					obj.put("Indian Embassy No.", itemsArray[9]);
+					obj.put("Issue date of permit number", itemsArray[10]);
+					obj.put("Passport number", itemsArray[11]);
+					obj.put("Passport issuing country", itemsArray[12]);
+					obj.put("Passport issued Date", customDate(itemsArray[13]));
+					obj.put("Passport Expiry Date", itemsArray[14]);
+					obj.put("PAN registration district", itemsArray[15]);
+					obj.put("Father's name", itemsArray[16]);
+					obj.put("Father-In-Law's Name", itemsArray[17]);
+					obj.put("Mother's Name", itemsArray[18]);
+					obj.put("Grandfather's name", itemsArray[19]);
+					obj.put("Spouse name", itemsArray[20]);
+					obj.put("Background of the Guarantor", itemsArray[21]);
+					obj.put("Total Assets", itemsArray[22]);
+					obj.put("Total Liabilities", itemsArray[23]);
+					obj.put("Net-worth",itemsArray[24] );
+					obj.put("Gender", itemsArray[25]);
+					obj.put("Nationality", itemsArray[26]);
+					obj.put("VDC/Muncipality", itemsArray[27]);
+					obj.put("District", itemsArray[28]);
+					obj.put("NET-WORTH DETAILS",itemsArray[29] );
+					obj.put("Relation with Applicant", itemsArray[30]);
+					obj.put("Contact No.", itemsArray[31]);
+					obj.put("Land and Building", itemsArray[32]);
+					obj.put("Movables Asset",itemsArray[33] );
+					obj.put("Share and Debenture", itemsArray[34]);
+					obj.put("Others",itemsArray[35] );
+					obj.put("NMB Loan",itemsArray[36] );
+					obj.put("Other Bank Loan", itemsArray[37]);
+					obj.put("Other Liability", itemsArray[38]);
+					
+					
+					
+					jsonArray_IndividualGuarantor.clear();
+					jsonArray_IndividualGuarantor.add(obj);
+					
+					iFormObj.addDataToGrid("table39", jsonArray_IndividualGuarantor);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_IndividualGurantor"+e);
+			}
+			
+			//for CS_Legend
+			JSONArray jsonArray_Legend = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select Abbreviation,Fullform from CS_Legend where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Abbreviation", itemsArray[0]);
+					obj.put("Full Form", itemsArray[1]);
+					jsonArray_Legend.clear();
+					jsonArray_Legend.add(obj);
+					
+					iFormObj.addDataToGrid("table103", jsonArray_Legend);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_LEGEND"+e);
+			}
+			
+			//for CS_ShareholdingPattern
+			JSONArray jsonArray_ShareholdingPattern = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select ShareholderName,ShareholderDesignation,ShareholdingAmount,ShareholdingPercentage from CS_ShareholdingPattern where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Shareholder's Name", itemsArray[0]);
+					obj.put("Shareholder's Designation", itemsArray[1]);
+					obj.put("Shareholding Amount", itemsArray[2]);
+					obj.put("Shareholding Percentage", itemsArray[3]);
+					
+					jsonArray_ShareholdingPattern.clear();
+					jsonArray_ShareholdingPattern.add(obj);
+					
+					iFormObj.addDataToGrid("table37", jsonArray_ShareholdingPattern);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_ShareholdingPattern"+e);
+			}
+			
+			//for CS_SisterConcern
+			JSONArray jsonArray_SisterConcern = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select CompanyName,KeyPerson,Nature,Remarks from CS_SisterConcern where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Company Name", itemsArray[0]);
+					obj.put("Key Person", itemsArray[1]);
+					obj.put("Nature", itemsArray[2]);
+					obj.put("Remarks", itemsArray[3]);
+					
+					jsonArray_SisterConcern.clear();
+					jsonArray_SisterConcern.add(obj);
+					
+					iFormObj.addDataToGrid("table41", jsonArray_SisterConcern);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_SisterConcern"+e);
+			}
+			
+			// for CS_IndustryMarketRisk
+			JSONArray jsonArray_IndustryMarketRisk = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select RiskFactor,Mitigants from CS_IndustryMarketRisk where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Risk Factor", itemsArray[0]);
+					obj.put("Mitigants", itemsArray[1]);
+
+					jsonArray_IndustryMarketRisk.clear();
+					jsonArray_IndustryMarketRisk.add(obj);
+					
+					iFormObj.addDataToGrid("table45", jsonArray_IndustryMarketRisk);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_IndustryMarketRisk"+e);
+			}
+			
+			// for CS_BusinessManagementRisk
+			JSONArray jsonArray_BusinessManagementRisk = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select RiskFactor,Mitigants from CS_BusinessManagementRisk where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext()) 
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Risk Factor", itemsArray[0]);
+					obj.put("Mitigants", itemsArray[1]);
+					
+					jsonArray_BusinessManagementRisk.clear();
+					jsonArray_BusinessManagementRisk.add(obj);
+					
+					iFormObj.addDataToGrid("table46", jsonArray_BusinessManagementRisk);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_BusinessManagementRisk"+e);
+			}
+			
+			//for CS_DPG
+			JSONArray jsonArray_DPG = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select ExistingCust,NameOfTheGuarantor,CIFID,Gender,Nationality,RelationToApplicant,Relationwithpro,IndianEmbassyNo,CitizenshipNo,CitizenshipIssuedDate,citizendateBS,CitizenshipIssuedDistrict," //12
+						+ "DateofBirth,DOBBS,Age,WardNo,StreetName,VDCMunicipality,District,CityPlace,ProvinceState,CurrentAddress,Fatherinlaw,GrandfatherName," //12
+						+ "FatherName,MotherName,SpouseName,Offspring,Experience,currentassociation,TotalAsset,TotalLiability,NetWorth," //09
+						+ "landandbuilding,others,NMBloan,otherbankloan,otherliability,PanNo,Panissuedate,Panissuedistrict,voteridno,passportno,passportissuedate from CS_DPG where PID='"+pID+"'"; //11
+				 
+				
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				LogMessages.statusLogSME.info("QueryList: " + QueryList);
+				LogMessages.statusLogSME.info("Inside DPG ");
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					LogMessages.statusLogSME.info("Inside DPG Data");
+					JSONObject obj = new JSONObject();
+					
+					LogMessages.statusLogSME.info("Is Existing Customer="+itemsArray[0].toString());
+					obj.put("Is Existing Customer ?",itemsArray[0]);
+					
+					LogMessages.statusLogSME.info("Name of Proprietor/Partner/ShareHolder/Guarantor="+itemsArray[1].toString());
+					obj.put("Name of Proprietor/Partner/Shareholder/Guarantor", itemsArray[1]);
+					
+					LogMessages.statusLogSME.info("CIF ID="+itemsArray[2].toString());
+					obj.put("CIF ID", itemsArray[2]);
+					
+					LogMessages.statusLogSME.info("Gender="+itemsArray[3].toString());
+					obj.put("Gender", itemsArray[3]);
+					
+					LogMessages.statusLogSME.info("Nationality="+itemsArray[4].toString());
+					obj.put("Nationality", itemsArray[4]);
+					
+					LogMessages.statusLogSME.info("Relation with Firm/Company="+itemsArray[5].toString());
+					obj.put("Relation with Firm/Company", itemsArray[5]);
+					
+					LogMessages.statusLogSME.info("Relation with Proprietor/Partner/Promoter="+itemsArray[6].toString());
+					obj.put("Relation with Proprietor/Partner/Promoter", itemsArray[6]);
+					
+					LogMessages.statusLogSME.info("Indian Embassy No="+itemsArray[7].toString());
+					obj.put("Indian Embassy No.", itemsArray[7]); 
+					
+					LogMessages.statusLogSME.info("Citizenship No="+itemsArray[8].toString());
+					obj.put("Citizenship No.", itemsArray[8]);
+					
+					LogMessages.statusLogSME.info("Citizenship Issued Date direct item "+itemsArray[9]);
+					LogMessages.statusLogSME.info("Citizenship Issued Date "+customDate(itemsArray[9]));
+					obj.put("Citizenship Issued Date", customDate(itemsArray[9]));
+					
+					LogMessages.statusLogSME.info("Citizenship Issued bs="+itemsArray[10].toString());
+					obj.put("Citizenship Issued Date (BS)", itemsArray[10]);
+					
+					LogMessages.statusLogSME.info("Citizenship Issued District="+itemsArray[11].toString());
+					obj.put("Citizenship Issued District", itemsArray[11]);
+					
+					LogMessages.statusLogSME.info("DOB "+customDate(itemsArray[12]));
+					obj.put("Date of Birth",customDate(itemsArray[12]));
+					
+					LogMessages.statusLogSME.info("Date of Birth (BS)="+itemsArray[13].toString());
+					obj.put("Date of Birth (BS)", itemsArray[13]);
+					
+					LogMessages.statusLogSME.info("Age="+itemsArray[14].toString());
+					obj.put("Age", itemsArray[14]);
+					
+					LogMessages.statusLogSME.info("Ward No="+itemsArray[15].toString());
+					obj.put("Ward No", itemsArray[15]);
+					
+					LogMessages.statusLogSME.info("Street Name="+itemsArray[16].toString());
+					obj.put("Street Name", itemsArray[16]);
+					
+					LogMessages.statusLogSME.info("VDC/Municipality="+itemsArray[17].toString());
+					obj.put("VDC / Municipality", itemsArray[17]);
+					
+					LogMessages.statusLogSME.info("District="+itemsArray[18].toString());
+					obj.put("District", itemsArray[18]);
+					
+					LogMessages.statusLogSME.info("City/Place="+itemsArray[19].toString());
+					obj.put("City / Place", itemsArray[19]);
+					
+					LogMessages.statusLogSME.info("Province/State="+itemsArray[20].toString());
+					obj.put("Province / State", itemsArray[20]);
+					
+					LogMessages.statusLogSME.info("Current Address="+itemsArray[21].toString());
+					obj.put("Current Address", itemsArray[21]);
+					
+					LogMessages.statusLogSME.info("Father in Law Name="+itemsArray[22].toString());
+					obj.put("Father in Law Name", itemsArray[22]);
+					
+					LogMessages.statusLogSME.info("Grandfather's Name="+itemsArray[23].toString());
+					obj.put("Grandfather's Name", itemsArray[23]);
+					
+					LogMessages.statusLogSME.info("Father's Name="+itemsArray[24].toString());
+					obj.put("Father's Name", itemsArray[24]);
+					
+					LogMessages.statusLogSME.info("Mother's Name="+itemsArray[25].toString());
+					obj.put("Mother's Name", itemsArray[25]);
+					
+					LogMessages.statusLogSME.info("Spouse Name="+itemsArray[26].toString());
+					obj.put("Spouse Name", itemsArray[26]);
+					
+					LogMessages.statusLogSME.info("Offspring="+itemsArray[27].toString());
+					obj.put("Offspring", itemsArray[27]);
+					
+					LogMessages.statusLogSME.info("Experience and backround="+itemsArray[28].toString());
+					obj.put("Experience & Background", itemsArray[28]);
+					
+					LogMessages.statusLogSME.info("Current Association/Position/Goodwill="+itemsArray[29].toString());
+					obj.put("Current Association/Position/Goodwill", itemsArray[29]);
+					
+					LogMessages.statusLogSME.info("Total Asset="+itemsArray[30].toString());
+					obj.put("Total Asset", itemsArray[30]);  
+					
+					LogMessages.statusLogSME.info("Total Liability="+itemsArray[31].toString());
+					obj.put("Total Liability",itemsArray[31]);
+					
+					LogMessages.statusLogSME.info("Net-Worth="+itemsArray[32].toString());
+					obj.put("Net - Worth", itemsArray[32]);
+					
+					LogMessages.statusLogSME.info("Land and Building="+itemsArray[33].toString());
+					obj.put("Land and Building", itemsArray[33]);
+					
+					LogMessages.statusLogSME.info("Other assets="+itemsArray[34].toString());
+					obj.put("Other assets (Cash & bank balance,other F.A,jewelers,Shares", itemsArray[34]);
+					
+					LogMessages.statusLogSME.info("NMB Loan="+itemsArray[35].toString());
+					obj.put("NMB Loan", itemsArray[35]);
+					
+					LogMessages.statusLogSME.info("Other Bank Loan="+itemsArray[36].toString());
+					obj.put("Other Bank Loan", itemsArray[36]);
+					
+					LogMessages.statusLogSME.info("other liability="+itemsArray[37].toString());
+					obj.put("Other Liability ", itemsArray[37]);
+					
+					LogMessages.statusLogSME.info("PAN No="+itemsArray[38].toString());
+					obj.put("PAN No", itemsArray[38]);
+					
+					LogMessages.statusLogSME.info("PAN Issued Date:"+customDate(itemsArray[39]));
+					obj.put("PAN Issued Date", customDate(itemsArray[39]));
+					
+					LogMessages.statusLogSME.info("PAN Isuued district="+itemsArray[40].toString());
+					obj.put("PAN Issued District", itemsArray[40]); 
+					
+					LogMessages.statusLogSME.info("Voter ID No="+itemsArray[41].toString());
+					obj.put("Voter ID No", itemsArray[41]);
+					
+					LogMessages.statusLogSME.info("Passport No="+itemsArray[42].toString());
+					obj.put("Passport No", itemsArray[42]);
+					
+					LogMessages.statusLogSME.info("Passport Issued Date:"+customDate(itemsArray[43]));
+					obj.put("Passport Issued Date",customDate(itemsArray[43]));
+					
+					LogMessages.statusLogSME.info("DPG Data Load Finish");
+					
+					
+					jsonArray_DPG.clear();
+					jsonArray_DPG.add(obj);
+					
+					iFormObj.addDataToGrid("table49", jsonArray_DPG);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_DPG"+e);
+			}
+			
+			// for CS_EnvironmentalSocialRisk
+			JSONArray jsonArray_EnvironmentalSocialRisk = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select RiskFactor,Mitigants from CS_EnvironmentalSocialRisk where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Risk Factor", itemsArray[0]);
+					obj.put("Mitigants", itemsArray[1]);
+					jsonArray_EnvironmentalSocialRisk.clear();
+					jsonArray_EnvironmentalSocialRisk.add(obj);
+					
+					iFormObj.addDataToGrid("table47", jsonArray_EnvironmentalSocialRisk);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_EnvironmentalSocialRisk"+e);
+			}
+			
+			// for CS_CorporateGuarantor
+			JSONArray jsonArray_CorporateGuarantor = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select Existingcustomer,CIFID,Nameofthefirm,FirmRegistrationNo,KeyPerson,Keypersontitle,PANNumber,PANRegistrationDate,pandatebs,"
+				        + "PANRegistrationDistrict,FirmRegistrationDate,firmregdatebs,"
+						+ "FirmRegistrationExpiryDate,firmexpdate,RegisteredBody,VDCMunicipality,District,WardNo,RegisteredAddress,"
+						+ "CorrespondenceAddress,Background from CS_CorporateGuarantor where PID='"+pID+"'";
+				
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					LogMessages.statusLogSME.info("Inside Corporate Gurantor ");
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Is Guarantor existing customer ?", itemsArray[0]);
+					LogMessages.statusLogSME.info("Is Gurantor existing "+itemsArray[0].toString());
+					obj.put("CIF ID", itemsArray[1]);
+					LogMessages.statusLogSME.info("CIF ID="+itemsArray[1].toString());
+					obj.put("Name of the firm / Company", itemsArray[2]);
+					obj.put(" Firm / Company Registration No.", itemsArray[3]);
+					LogMessages.statusLogSME.info("Firm/Company/Registration No "+itemsArray[3].toString());
+					obj.put("Key Person", itemsArray[4]);
+					obj.put("Key Person Title", itemsArray[5]);
+					obj.put("PAN Number", itemsArray[6]);
+					
+					LogMessages.statusLogSME.info("PAN Registration Date "+customDate(itemsArray[7]));
+					obj.put("PAN Registration Date", customDate(itemsArray[7]));
+					
+					obj.put("PAN Registration Date (BS)", customDate(itemsArray[8])); 
+					obj.put("PAN Registration District", itemsArray[9]);
+					
+					LogMessages.statusLogSME.info("Firm Registration Date"+customDate(itemsArray[10]));
+					obj.put("Firm Registration Date", customDate(itemsArray[10]));
+				
+					obj.put("Firm Registration Date (BS)", customDate(itemsArray[11]));
+					
+					LogMessages.statusLogSME.info("Firm Expiry Date "+customDate(itemsArray[12]));
+					obj.put("Firm Expiry Date", customDate(itemsArray[12]));
+					
+					obj.put("Firm Expiry Date (BS)", customDate(itemsArray[13]));  
+					obj.put("Registered body", itemsArray[14]);
+					obj.put("VDC / Municipality", itemsArray[15]);
+					obj.put("District", itemsArray[16]);
+					obj.put("Ward No", itemsArray[17]);
+					obj.put("Registered Address", itemsArray[18]);
+					obj.put("Correspondence Address", itemsArray[19]);
+					obj.put("Background", itemsArray[20]);
+					
+					jsonArray_CorporateGuarantor.clear();
+					jsonArray_CorporateGuarantor.add(obj);
+					
+					iFormObj.addDataToGrid("table44", jsonArray_CorporateGuarantor);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_CorporateGuarantor"+e);
+			}
+			
+			//for cs_facility
+			JSONArray jsonArray_facility = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="select Facility,InnerOuter,FacilityType,Proposed,Outstanding,NRB93,NRB93Ka,NRB94," //08  
+							+ "BaselCode,RevolvoingTerminating,Purpose,Approved,Tenor," //05
+							+ "IndustryCode,FeesCommissions,InnerOf,MoratoriumPeriod,NRB171,PrePaymentFee,"  //06
+							+ "IRPremiumExisting,IRPremiumProposed,SubsidyRate,MaturityDate,ExistingLimit," //05
+							+ "InterestProposed,InterestExisting,PaidInstallments,RemainingInstallments," //04
+							+ "MoratoriumEndDate,Base1,NRB93CodeT,NRB93KaCodeT,NRB94CodeT,NRB171CodeT," //06
+							+ "BaselCodeT,IndustryCodeT,EMI,LimitSuffix,ParentID,CCY,SchmDesc,SchmCode,EINonEI," //09
+							+ "SchmType,CrnyCode,GLSubHead,PurposeofADV,SubsectorCode,FreeCode,NatureofADVN,IndustryType," //08
+							+ "Tenordays,ServiceFeeText,structure,FacilityID,RelatedFacilityID," //05
+							+ "InspectedByCIR,quarterlymonth,engnepcalender,englishdate,nepalidate,quarterend,Accountno from cs_facility where PID='"+pID+"'"; //07
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				LogMessages.statusLogSME.info("Inside Facility Grid Data");
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					LogMessages.statusLogSME.info("Facility="+itemsArray[0]);
+					obj.put("Facility", itemsArray[0]);
+					
+					LogMessages.statusLogSME.info("I/O="+itemsArray[1]);
+					obj.put("I/O", itemsArray[1]);
+					
+					LogMessages.statusLogSME.info("Facility Type="+itemsArray[2]);
+					obj.put("Facility Type", itemsArray[2]);
+					
+					LogMessages.statusLogSME.info("Proposed="+itemsArray[3]);
+					obj.put("Proposed", itemsArray[3]);
+					
+					LogMessages.statusLogSME.info("Outstanding="+itemsArray[4]);
+					obj.put("Outstanding", itemsArray[4]);
+					
+					LogMessages.statusLogSME.info("NRB 9.3="+itemsArray[5]);
+					obj.put("NRB 9.3", itemsArray[5]);
+					
+					LogMessages.statusLogSME.info("NRB 9.3 (Ka)="+itemsArray[6]);
+					obj.put("NRB 9.3 (Ka)", itemsArray[6]);
+					
+					LogMessages.statusLogSME.info("NRB 9.4="+itemsArray[7]);
+					obj.put("NRB 9.4", itemsArray[7]);
+					
+					LogMessages.statusLogSME.info("Basel Code="+itemsArray[8]);
+					obj.put("Basel Code", itemsArray[8]);
+					
+					LogMessages.statusLogSME.info("R/T="+itemsArray[9]);
+					obj.put("R/T", itemsArray[9]);
+					
+					LogMessages.statusLogSME.info("Purpose="+itemsArray[10]);
+					obj.put("Purpose", itemsArray[10]);
+					
+					LogMessages.statusLogSME.info("Initially Proposed="+itemsArray[11]);
+					obj.put("Initially Proposed", itemsArray[3]);
+					
+					LogMessages.statusLogSME.info("Tenor="+itemsArray[12]);
+					obj.put("Tenor", itemsArray[12]);
+					
+					LogMessages.statusLogSME.info("Industry Code="+itemsArray[13]);
+					obj.put("Industry Code", itemsArray[13]);
+					
+					LogMessages.statusLogSME.info("Fees / Commissions="+itemsArray[14]);
+					obj.put("Fees / Commissions", itemsArray[14]);
+					
+					LogMessages.statusLogSME.info("Inner of="+itemsArray[15]);
+					obj.put("Inner Of Duplicate", itemsArray[15]);
+					obj.put("Inner of",itemsArray[15]);
+					
+					LogMessages.statusLogSME.info("Moratorium Period (months)="+itemsArray[16]);
+					obj.put("Moratorium Period (months)", itemsArray[16]);
+					
+					LogMessages.statusLogSME.info("NRB 17.1="+itemsArray[17]);
+					obj.put("NRB 17.1", itemsArray[17]);
+					
+					LogMessages.statusLogSME.info("Pre - Payment Fee="+itemsArray[18]);
+					obj.put("Pre - Payment Fee", itemsArray[18]);
+					
+					LogMessages.statusLogSME.info("IR Premium Existing="+itemsArray[20]);
+					obj.put("IR Premium Existing", itemsArray[20]);
+					
+					LogMessages.statusLogSME.info("IR Premium Proposed="+itemsArray[20]);
+					obj.put("IR Premium Proposed", itemsArray[20]);
+					
+					LogMessages.statusLogSME.info("Subsidy/Discount Rate="+itemsArray[21]);
+					obj.put("Subsidy/Discount Rate", itemsArray[21]);
+					
+					LogMessages.statusLogSME.info("Maturity Date="+itemsArray[22]);
+					obj.put("Maturity Date", customDate(itemsArray[22]));
+					
+					LogMessages.statusLogSME.info("Existing Limit="+itemsArray[23]);
+					obj.put("Existing Limit", itemsArray[3]);
+					
+					LogMessages.statusLogSME.info("Interest Proposed="+itemsArray[24]);
+					obj.put("Interest Proposed", itemsArray[24]);
+					
+					LogMessages.statusLogSME.info("Interest Existing="+itemsArray[25]);
+					obj.put("Interest Existing", itemsArray[25]);
+					
+					LogMessages.statusLogSME.info("Paid Installments="+itemsArray[26]);
+					obj.put("Paid Installments", itemsArray[26]);
+					
+					LogMessages.statusLogSME.info("Remaining Installments="+itemsArray[27]);
+					obj.put("Remaining Installments", itemsArray[27]);
+					
+					LogMessages.statusLogSME.info("Moratorium End Date="+itemsArray[28]);
+					obj.put("Moratorium End Date", customDate(itemsArray[28]));
+					
+					LogMessages.statusLogSME.info("Base Rate="+itemsArray[29]);
+					obj.put("Base Rate", itemsArray[29]);
+					
+					LogMessages.statusLogSME.info("NRB 9.3 Code="+itemsArray[30]);
+					obj.put("NRB 9.3 Code", itemsArray[30]);
+					
+					LogMessages.statusLogSME.info("NRB 9.3 (KA) Code="+itemsArray[31]);
+					obj.put("NRB 9.3 (KA) Code", itemsArray[31]);
+					
+					LogMessages.statusLogSME.info("NRB 9.4 Code="+itemsArray[32]);
+					obj.put("NRB 9.4 Code", itemsArray[32]);
+					
+					LogMessages.statusLogSME.info("NRB 17.1 Code="+itemsArray[33]);
+					obj.put("NRB 17.1 Code", itemsArray[33]);
+					
+					LogMessages.statusLogSME.info("Basel Code (Code)="+itemsArray[34]);
+					obj.put("Basel Code (Code)", itemsArray[34]);
+					
+					LogMessages.statusLogSME.info("Industry Code (Code)="+itemsArray[35]);
+					obj.put("Industry Code (Code)", itemsArray[35]);
+					
+					LogMessages.statusLogSME.info("EMI="+itemsArray[36]);
+					obj.put("EMI", itemsArray[36]);
+					
+					LogMessages.statusLogSME.info("Limit Suffix="+itemsArray[37]);
+					obj.put("Limit Suffix", itemsArray[37]);
+					
+					LogMessages.statusLogSME.info("Parent ID="+itemsArray[38]);
+					obj.put("Parent ID", itemsArray[38]);
+					
+					LogMessages.statusLogSME.info("CCY="+itemsArray[39]);
+					obj.put("CCY", itemsArray[39]);
+					
+					LogMessages.statusLogSME.info("Scheme Description="+itemsArray[40]);
+					obj.put("Scheme Description", itemsArray[40]);
+					
+					LogMessages.statusLogSME.info("Scheme Code="+itemsArray[41]);
+					obj.put("Scheme Code", itemsArray[41]);
+					
+					LogMessages.statusLogSME.info("Product Group="+itemsArray[42]);
+					obj.put("Product Group", itemsArray[42]);
+					
+					LogMessages.statusLogSME.info("Scheme Type="+itemsArray[43]);
+					obj.put("Scheme Type", itemsArray[43]);
+					
+					LogMessages.statusLogSME.info("Currency Code="+itemsArray[44]);
+					obj.put("Currency Code", itemsArray[44]);
+					
+					LogMessages.statusLogSME.info("GL Sub Head Code="+itemsArray[45]);
+					obj.put("GL Sub Head Code", itemsArray[45]);
+					
+					LogMessages.statusLogSME.info("Purpose of ADV="+itemsArray[46]);
+					obj.put("Purpose of ADV", itemsArray[46]);
+					
+					LogMessages.statusLogSME.info("Sub Sector Code="+itemsArray[47]);
+					obj.put("Sub Sector Code", itemsArray[47]);
+					
+					LogMessages.statusLogSME.info("Free Code="+itemsArray[48]);
+					obj.put("Free Code", itemsArray[48]);
+					
+					LogMessages.statusLogSME.info("Nature of ADVN="+itemsArray[49]);
+					obj.put("Nature of ADVN", itemsArray[49]);
+					
+					LogMessages.statusLogSME.info("Industry Type="+itemsArray[50]);
+					obj.put("Industry Type", itemsArray[50]);
+					
+					LogMessages.statusLogSME.info("Deal Tenor (in Days)="+itemsArray[51]);
+					obj.put("Deal Tenor (in Days)", itemsArray[51]);
+					
+					LogMessages.statusLogSME.info("Services Fees="+itemsArray[52]);
+					obj.put("Services Fees", itemsArray[52]);
+					
+					LogMessages.statusLogSME.info("structure="+itemsArray[53]);
+					obj.put("structure", itemsArray[53]);
+					
+					LogMessages.statusLogSME.info("Facility ID="+itemsArray[54]);
+					obj.put("Facility ID", itemsArray[54]);
+					
+					LogMessages.statusLogSME.info("Related Facility ID="+itemsArray[55]);
+					obj.put("Related ID Duplicate", itemsArray[55]);
+					obj.put("Related Facility ID", itemsArray[55]);
+					
+					LogMessages.statusLogSME.info("Repayment Mode="+itemsArray[56]);
+					obj.put("Repayment Mode", itemsArray[56]);
+					
+					LogMessages.statusLogSME.info("Quarterly Months="+itemsArray[57]);
+					obj.put("Quarterly Months", itemsArray[57]);
+					
+					LogMessages.statusLogSME.info("Eng/Nep calander="+itemsArray[58]);
+					obj.put("Eng/Nep calander", itemsArray[58]);
+					
+					LogMessages.statusLogSME.info("English Date="+itemsArray[59]);
+					obj.put("English Date", customDate(itemsArray[59]));
+					
+					LogMessages.statusLogSME.info("Nepali Date="+itemsArray[60]);
+					obj.put("Nepali Date", itemsArray[60]);
+					
+					LogMessages.statusLogSME.info("Quarter End Date="+itemsArray[61]);
+					obj.put("Quarter End Date", itemsArray[61]);
+					
+					LogMessages.statusLogSME.info("Account Number="+itemsArray[62]);
+					obj.put("Account Number", itemsArray[62]);
+				
+					jsonArray_facility.clear();
+					jsonArray_facility.add(obj);
+					
+					iFormObj.addDataToGrid("table36", jsonArray_facility);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in cs_facility"+e);
+			}
+			
+			// for CS_TermLoan
+			JSONArray jsonArray_TermLoan = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select AssetType,AssetValue,FinancingPercent,Financing from CS_TermLoan where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Asset Type", itemsArray[0]);
+					obj.put("Asset Value", itemsArray[1]);
+					obj.put("Financing Percentage", itemsArray[2]);
+					obj.put("Financing", itemsArray[3]);
+					jsonArray_TermLoan.clear();
+					jsonArray_TermLoan.add(obj);
+					
+					iFormObj.addDataToGrid("table75", jsonArray_TermLoan);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_TermLoan", e);
+			}
+			
+			// for CS_FacilityStructureRisk
+			JSONArray jsonArray_FacilityStructureRisk = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select FacilityRisk,Mitigants from CS_FacilityStructureRisk where PID=+'"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Facility Risk", itemsArray[0]);
+					obj.put("Mitigants", itemsArray[1]);
+					jsonArray_FacilityStructureRisk.clear();
+					jsonArray_FacilityStructureRisk.add(obj);
+					
+					iFormObj.addDataToGrid("table52", jsonArray_FacilityStructureRisk);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_FacilityStructureRisk", e);
+			}
+			
+			//for CS_feecommission
+			JSONArray jsonArray_feecommission = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select Heading,FeeCommission,AmountSTC,AmountProposed from CS_feecommission where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Heading", itemsArray[0]);
+					obj.put("Fees and Commission", itemsArray[1]);
+					obj.put("Amount Percent as per STC", itemsArray[2]);
+					obj.put("Amount Percent as proposed", itemsArray[3]);
+					jsonArray_feecommission.clear();
+					jsonArray_feecommission.add(obj);
+					
+					iFormObj.addDataToGrid("table101", jsonArray_feecommission);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_feecommission", e);
+			}
+			
+			// for CS_InfoOfCollateral
+			JSONArray jsonArray_InfoOfCollateral = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select COL_ID,ColDedupe,CollateralType,Property,Numberofcollateral,NameofOwner,NameOwner1,NameOwner2,NameOwner3,NameOwner4,PlotNo,WardNo,RAPD,PlaceStreetName,age,VDCMunicipality,CurrentMunicipality,Location,District,LandRevenueOffice,Typesofmeasurement,"
+						+ "Bigha,kattha,Dhur,ropani,Aana,Paisa,Daam,BKD,Area,AreaNetofAllDeduction,RelationshipCollateralOwner,OwnershipType,OwnerShipTransferredThrough,OwnershipTransferredDate,"
+						+ "AmountMentionedTransferDeed,ValuatorID,ValuatorName,ValuatorEmailAddress,ValuatorDistrict,ValuatorVDCMunicipality,"
+						+ "ValuatorBranch,ValTelephoneNo,ValContactPerson,ValuationConsidered,TypeofProperty,ShapeofLand,Doeslocationshape,MotorableRoadAccess,RoadWidth,"
+						+ "RoadAccessfrom,Theroadaccessatsite,Ifnotpleasecomment,Thereisnochange,Ifnopleasecomments,BuildingType,Typeofconstruction,"
+						+ "BuiltUpArea,NoOfStorey,NaksaPassObtained,BuildingCompletionCertificateObtained,Constructionappearstobe,Anyroadsetbacks,Anyrivercanalsetbacks,"
+						+ "AnyHightensionsetbacks,Ifyessetbackrequirement,areadeductedfromoriginalarea,Ihaveconfirmedpossession,Iwehaveenquiredfamily,"
+						+ "ConfirmationonReview,Isproposedcollateralcross,TotalFMVLand,TotalFMVofbuilding,TotalFMV,LessChargeforloan,ResidualFMV,"
+						+ "CollateralDistressedPercent,DistressedValue,anticipatedamount,NameofValuator,DateofValuation,DateofBirth,Gender,CitizenshipNo,"
+						+ "CitizenshipIssuedDate,SpouseName,FatherName,MotherName,GrandfatherName,CitizenshipIssuedDistrict,MobileNo,FirmRegistrationNo,"
+						+ "PANNO,AuthorizedpersonName,RegistrationDate,RegisteredVDCMunicipality,BusinessIncorporation,keycitizendatebs,province,registerbody,keycitizenno,keycitizendate,keycitizendistrict,firmname,remarks,NumberPlot,VDC2,WardNo2,"
+					    + "SheetNo2,Remarks2,Ropani1,Aana1,Paisa1,Daam1,PlotNo1,Area1,Province1,District1,VDC1,WardNo1,SheetNo1,Remarks1,Area2,"
+					    + "PlotNo2,Province2,District2,collateralmanland,yearconst,sale,coolingoff,visitdate,inspectedby,dobbs,registerdatebs,"
+					    + "keycitizendatebs,Proposed from CS_InfoOfCollateral where PID='"+pID+"'";              
+				
+				
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Col_ID", itemsArray[0]);
+					obj.put("Collateral Dedupe", itemsArray[1]); 
+					obj.put("Collateral Owner Type", itemsArray[2]);
+					obj.put("Property", itemsArray[3]); 
+					obj.put("Number of Collateral Owner", itemsArray[4]); 
+					obj.put("Name of Owner", itemsArray[5]);
+					obj.put("Name of Owner1", itemsArray[6]);
+					obj.put("Name of Owner2", itemsArray[7]);
+					obj.put("Name of Owner3", itemsArray[8]);
+					obj.put("Name of Owner4", itemsArray[9]);
+					obj.put(" Plot No", itemsArray[10]);
+					obj.put("Ward No", itemsArray[11]);
+					obj.put("Sheet No", itemsArray[12]);
+					obj.put("Place(Street Name)", itemsArray[13]);
+					obj.put("Age", itemsArray[14]);
+					obj.put("VDC/Municipality", itemsArray[15]);
+					obj.put("Current Municipality",itemsArray[16]);
+					obj.put("Location", itemsArray[17]);
+					obj.put("District", itemsArray[18]);
+					obj.put("Land Revenue Office", itemsArray[19]);
+					obj.put("Types of measurement", itemsArray[20]);
+					obj.put("Bigha", itemsArray[21]);
+					obj.put("Kattha", itemsArray[22]);
+					obj.put("Dhur", itemsArray[23]);
+					obj.put("Ropani", itemsArray[24]);
+					obj.put("Aana", itemsArray[25]);
+					obj.put("Paisa", itemsArray[26]);
+					obj.put("Daam", itemsArray[27]);
+					obj.put("Father In Law Name", itemsArray[28]);
+					obj.put("Area", itemsArray[29]);
+					obj.put("Area Net of All Deduction", itemsArray[30]);
+					obj.put("Relationship with Collateral Owner", itemsArray[31]);
+					obj.put("Ownership Type", itemsArray[32]);
+					obj.put(" OwnerShip Transferred Through", itemsArray[33]);
+					obj.put("Ownership Transferred Date", customDate(itemsArray[34]));
+					obj.put("Amount Mentioned in Transfer Deed", itemsArray[35]);
+					obj.put("Valuator ID", itemsArray[36]);
+					obj.put("Valuator's Name", itemsArray[37]);
+					obj.put("Valuator's Email Address", itemsArray[38]);
+					obj.put("Valuator's District", itemsArray[39]);
+					obj.put("Valuator's VDC Municipality", itemsArray[40]);
+					obj.put("Valuator's Branch", itemsArray[41]);
+					obj.put("Valuator's Telephone No", itemsArray[42]);
+					obj.put("Valuator's Contact Person", itemsArray[43]);
+					obj.put("Valuation Considered", itemsArray[44]);
+					obj.put("Type of Property", itemsArray[45]);
+					obj.put("Shape of Land", itemsArray[46]);
+					obj.put("Does location & shape of land appear consistent with Blue Print?", itemsArray[47]);
+					obj.put("Motor-able Road Access", itemsArray[48]);
+					obj.put("Road Width", itemsArray[49]);
+					obj.put("Road Access from", itemsArray[50]);
+					obj.put("The road access at site is as per blue print and trace map", itemsArray[51]);
+					obj.put("If not, please comment", itemsArray[52]);
+					obj.put("There is no change in road width of the collateral/s", itemsArray[53]);
+					obj.put("If no, please comments", itemsArray[54]);
+					obj.put("Building Type", itemsArray[55]);
+					obj.put("Type of construction", itemsArray[56]);
+					obj.put("Built Up Area", itemsArray[57]);
+					obj.put("No. Of Storey", itemsArray[58]);
+					obj.put("Naksa Pass Obtained", itemsArray[59]);
+					obj.put("Building Completion Certificate Obtained", itemsArray[60]);
+					obj.put("Construction appears to be as per the Approved Naksa Pass", itemsArray[61]);
+					obj.put("Any road setbacks? ", itemsArray[62]);
+					obj.put("Any river/canal setbacks? ", itemsArray[63]);
+					obj.put("Any High-tension setbacks?", itemsArray[64]);
+					obj.put(" If yes, setback requirement is", itemsArray[65]);
+					obj.put("area deducted from original area for valuation", itemsArray[66]);
+					obj.put("I have confirmed possession transfer of building to current owner", itemsArray[67]);
+					obj.put("Confirmed with family member & neighbor on no dispute on land", itemsArray[68]);
+					obj.put("Confirmation on Review of Valuation Report", itemsArray[69]);
+					obj.put("Is proposed collateral,cross-collateralized with loan facilities", itemsArray[70]);
+					obj.put("FMV of Land", itemsArray[71]);
+					obj.put("FMV of building", itemsArray[72]);
+					obj.put("Total FMV", itemsArray[73]);
+					obj.put("Less: Charge for other loan in cross-collateral case", itemsArray[74]);
+					obj.put("Residual FMV", itemsArray[75]);
+					obj.put("Collateral Distressed @ (please select the distress percentage)", itemsArray[76]);
+					obj.put("Distressed Value (DV)", itemsArray[77]);
+					obj.put("Anticipated Market Value of Collateral",78);
+					obj.put("Name of Valuator", itemsArray[79]);
+					obj.put("Date of Valuation", customDate(itemsArray[80]));
+					obj.put("Date of Birth", customDate(itemsArray[81]));
+					obj.put("Gender", itemsArray[82]);
+					obj.put("Citizenship No", itemsArray[83]);
+					obj.put("Citizenship Issued Date", customDate(itemsArray[84]));
+					obj.put("Spouse Name", itemsArray[85]);
+					obj.put("Father Name", itemsArray[86]);
+					obj.put("Mother Name", itemsArray[87]);
+					obj.put("Grandfather Name", itemsArray[88]);
+					obj.put("Citizenship Issued District", itemsArray[89]);
+					obj.put("Mobile No", itemsArray[90]);
+					obj.put("Firm Registration No", itemsArray[91]);
+					obj.put("PAN No", itemsArray[92]);
+					obj.put("Authorized person Name", itemsArray[93]);
+					obj.put("Registration Date", customDate(itemsArray[94]));
+					obj.put("Registered Address", itemsArray[95]);
+					obj.put("Business Incorporation", itemsArray[96]);
+					obj.put("Citizenship Issued Date (BS)", itemsArray[97]);
+					obj.put("Province", itemsArray[98]);
+					obj.put("Registered Body", itemsArray[99]);
+					obj.put("Authorized Person Citizenship No", itemsArray[100]);
+					obj.put("Authorized Person Citizenship Issued Date", customDate(itemsArray[101]));
+					obj.put("Authorized Person Citizenship Issued District", itemsArray[102]);
+					obj.put("Firm Name", itemsArray[103]);
+					obj.put("Remarks", itemsArray[104]);
+					obj.put("Number of Plot", itemsArray[105]);
+					obj.put("Plot No4", itemsArray[106]);
+					obj.put("Area4", itemsArray[107]);
+					obj.put("Plot No5", itemsArray[108]);
+					obj.put("Area5", itemsArray[109]);
+					obj.put("Plot No6", itemsArray[110]);
+					obj.put("Area6", itemsArray[111]);
+					obj.put("Plot No7", itemsArray[112]);
+					obj.put("Area7", itemsArray[113]);
+					obj.put("Plot No3", itemsArray[114]);
+					obj.put("Area3", itemsArray[115]);
+					obj.put("Plot No8", itemsArray[116]);
+					obj.put("Area8", itemsArray[117]);
+					obj.put("Plot No9", itemsArray[118]);
+					obj.put("Area9", itemsArray[119]);
+					obj.put("Plot No10", itemsArray[120]);
+					obj.put("Area10", itemsArray[121]);
+					obj.put("Area2", itemsArray[122]);
+					obj.put("Plot No2", itemsArray[123]);
+					obj.put("Plot No1", itemsArray[124]);
+					obj.put("Area1", itemsArray[125]);
+					obj.put("Collateral is not within the 500m distance from NO MANSLAND ?", itemsArray[126]);
+					obj.put("Year of Construction", itemsArray[127]);
+					obj.put("Ownership Daysdiff", itemsArray[128]);
+					obj.put("cooling off period (Remarks)", itemsArray[129]);
+					obj.put("Visit Date", customDate(itemsArray[130]));
+					obj.put("Inspected by (Functional Title and Name)", itemsArray[131]);
+					obj.put("Date of birth (BS)", itemsArray[132]);
+					obj.put("Registration Date (BS)", itemsArray[133]);
+					obj.put("Key Person Citizenship Issue date (BS)", itemsArray[134]);
+					obj.put("Proposed Limit (Ext)", itemsArray[135]);
+
+					
+					jsonArray_InfoOfCollateral.clear();
+					jsonArray_InfoOfCollateral.add(obj);
+					
+					iFormObj.addDataToGrid("table95", jsonArray_InfoOfCollateral);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_InfoOfCollateral", e);
+			}
+			
+			// for CS_ScheduleOfSecurity
+			JSONArray jsonArray_ScheduleOfSecurity = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select SecurityType,Typeofcollateral,ChargeType,collateralizewith,DateOfValuation,NameOfValuator,FMVofLand,FMVOfBuilding,TotalFMV,TotalDV,"
+						+ "Address,DistressedFactor,DaysDifference,Revaluation,DescriptionOfSecurity,VehicleType,VehicleBrand,LoanPriceRatio ,MakeYear,ModelNumber from CS_ScheduleOfSecurity where PID='"+pID+"'";
+                   
+				
+				
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{  
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Security Type", itemsArray[0]);
+					obj.put("Type of Collateral", itemsArray[1]);
+					obj.put("Charge Type", itemsArray[2]);
+					obj.put("Cross collateralized with", itemsArray[3]);
+					obj.put("Date of Valuation", customDate(itemsArray[4]));
+					obj.put("Name of Valuator", itemsArray[5]);
+					obj.put("FMV of Land", itemsArray[6]);
+					obj.put("FMV of Building", itemsArray[7]);
+					obj.put("Total FMV", itemsArray[8]);
+					obj.put("Total DV", itemsArray[9]);
+					obj.put("Address", itemsArray[10]);
+					obj.put("Distressed Factor", itemsArray[11]);
+					obj.put("Days difference", itemsArray[12]);
+					obj.put("Re-Valuation", itemsArray[13]);
+					obj.put("Description of Security", itemsArray[14]);
+					obj.put("Vehicle Type", itemsArray[15]);
+					obj.put("Vechicle Brand", itemsArray[16]);
+					obj.put("Loan to Price Ratio", itemsArray[17]);
+					obj.put("Make Year", itemsArray[18]);
+					obj.put("Model Number", itemsArray[19]);
+					
+					
+					jsonArray_ScheduleOfSecurity.clear();
+					jsonArray_ScheduleOfSecurity.add(obj);
+					
+					iFormObj.addDataToGrid("table43", jsonArray_ScheduleOfSecurity);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_ScheduleOfSecurity", e);
+			}
+			
+			// for CS_IncaseMarginLending
+			JSONArray jsonArray_IncaseMarginLending = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select StockSymbol,PromoterOrdinary,NoOfShares,BasePrice,CurrentMarketPrice,Average180days,ConsideredPrice,FMV,DV,DistressedFactor from CS_IncaseMarginLending where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Stock Symbol", itemsArray[0]);
+					obj.put("Promoter / Ordinary", itemsArray[1]);
+					obj.put("No of Shares", itemsArray[2]);
+					obj.put("Base Price", itemsArray[3]);
+					obj.put("Current Market Price", itemsArray[4]);
+					obj.put("180 days Average", itemsArray[5]);
+					obj.put("Considered Price", itemsArray[6]);
+					obj.put("FMV", itemsArray[7]);
+					obj.put("DV", itemsArray[8]);
+					obj.put("Distressed Factor", itemsArray[9]);
+					
+					jsonArray_IncaseMarginLending.clear();
+					jsonArray_IncaseMarginLending.add(obj);
+					
+					iFormObj.addDataToGrid("table53", jsonArray_IncaseMarginLending);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_IncaseMarginLending", e);
+			}
+			
+			// for CS_SecurityRisk
+			JSONArray jsonArray_SecurityRisk = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select SecurityRisk,Mitigants from CS_SecurityRisk where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Security Risk", itemsArray[0]);
+					obj.put("Mitigants", itemsArray[1]);
+					jsonArray_SecurityRisk.clear();
+					jsonArray_SecurityRisk.add(obj);
+					
+					iFormObj.addDataToGrid("table42", jsonArray_SecurityRisk);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_SecurityRisk", e);
+			}
+			
+			//for CS_Insurancesd
+			JSONArray jsonArray_Insurancesd = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select InsuredAssets,InsuranceCompany,InsuranceAmount,AssetsValue,Blanket,Cattle,Comprehensive,Contractor,Earthquake,Electronic,"
+						+ "Erection,Explosion,Fire,Flood,Household,Lightning,Loss,Malicious,Poultry,Riot,Storm,Subsidence,Theft,Third,ExpiryDate,Remarks,"
+						+ "policyno,CustomerName,NormalPremium,TotalPremium,statusInsurance,RiskStartDate  from CS_Insurancesd where PID='"+pID+"'";
+				
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Insured Assets", itemsArray[0]);
+					obj.put("Insurance Company", itemsArray[1]);
+					obj.put("Insurance Amount", itemsArray[2]);
+					obj.put("Assets Value", itemsArray[3]);
+		
+					obj.put("Blanket Insurance", itemsArray[4]);
+					obj.put("Cattle Insurance", itemsArray[5]);
+					obj.put("Comprehensive", itemsArray[6]);
+					obj.put("Contractor's All Risk (CAR)", itemsArray[7]);
+					obj.put("Earthquake", itemsArray[8]);
+					obj.put("Electronic Equipment Insurance", itemsArray[9]);
+					obj.put("Erection All Risk", itemsArray[10]);
+					obj.put("Explosion", itemsArray[11]);
+					obj.put("Fire", itemsArray[12]);
+					obj.put("Flood", itemsArray[13]);
+					obj.put("Household", itemsArray[14]);
+					obj.put("Lightning", itemsArray[15]);
+					
+					obj.put("Loss of Profit", itemsArray[16]);
+					obj.put("Malicious Damage", itemsArray[17]);
+					obj.put("Poultry Insurance", itemsArray[18]);
+					obj.put("Riot, Strike & Terrorism (RST)", itemsArray[19]);
+					obj.put("Storm",itemsArray[20]);
+					
+					obj.put("Subsidence or heave of the land or landslip (Landslides)", itemsArray[21]);
+					obj.put("Theft and Burglary", itemsArray[22]);
+					obj.put("Third Party", itemsArray[23]);
+					obj.put("Maturity Date", customDate(itemsArray[24]));
+					obj.put("Remarks", itemsArray[25]);
+					obj.put("Policy No", itemsArray[26]);
+					obj.put("Customer Name", itemsArray[27]);
+					obj.put("Normal Premium", itemsArray[28]);
+					obj.put("Total Premium Amount", itemsArray[29]);
+					obj.put("Status", itemsArray[30]);
+					obj.put("Risk Start Date", customDate(itemsArray[31]));
+					jsonArray_Insurancesd.clear();
+					jsonArray_Insurancesd.add(obj);
+					
+					iFormObj.addDataToGrid("table98", jsonArray_Insurancesd);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_Insurancesd", e);
+			}
+			
+			// for CS_BSIRDPCAL
+			JSONArray jsonArray_BSIRDPCAL = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select StockStatementDate,Location,Finishedgoods,storesspares,stocktransit,rawmaterial,totalstock,Receivables,Advancestosuppliers,Advancesfromcustomers,Creditors,SuppliersCreditGuarantee,Greatestvalue,"
+						+ "TotalNCA,DrawingPowerPercent,DrawingPower,ProposedWClimit,WClimit,SurplusDeficit,"
+						+ "totalSR from CS_BSIRDPCAL where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Stock Statement Date", customDate(itemsArray[0]));
+					obj.put("Location", itemsArray[1]);
+					obj.put("Finished Goods", itemsArray[2]);
+					obj.put("Stores and Spares", itemsArray[3]);
+					obj.put("Stock in Transits", itemsArray[4]);
+					obj.put("Raw materials & Packing Materials", itemsArray[5]);
+					obj.put("Total Stocks", itemsArray[6]);
+					obj.put("Receivables", itemsArray[7]);
+					obj.put("Advances to Suppliers", itemsArray[8]);
+					obj.put("Advances from customers", itemsArray[9]);
+					obj.put("Creditors", itemsArray[10]);
+					obj.put("Suppliers Credit Guarantee", itemsArray[11]);
+					obj.put("Greatest value", itemsArray[12]);
+					obj.put("Total NCA", itemsArray[13]);
+					obj.put("Drawing Power (Please select %)", itemsArray[14]);
+					obj.put("Drawing Power", itemsArray[15]);
+					obj.put("Proposed WC limit from us", itemsArray[16]);
+					obj.put("WC limit from other banks", itemsArray[17]);
+					obj.put("Surplus Deficit", itemsArray[18]);
+					obj.put("Total Stock and receivable", itemsArray[19]);
+					
+					jsonArray_BSIRDPCAL.clear();
+					jsonArray_BSIRDPCAL.add(obj);
+					
+					iFormObj.addDataToGrid("table59", jsonArray_BSIRDPCAL);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_BSIRDPCAL", e);
+			}
+			
+			//for CS_CriticalFinancial
+			JSONArray jsonArray_CriticalFinancial = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select Risk,Mitigants from CS_CriticalFinancial where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Risk", itemsArray[0]);
+					obj.put("Mitigants", itemsArray[1]);
+					
+					jsonArray_CriticalFinancial.clear();
+					jsonArray_CriticalFinancial.add(obj);
+					
+					iFormObj.addDataToGrid("table60", jsonArray_CriticalFinancial);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_CriticalFinancial", e);
+			}
+			
+			// for CS_InsuranceType
+			JSONArray jsonArray_InsuranceType = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select InsuranceDone,Insurancerequest,NameofTheClient,Address,BuildingLocation,PlotNowitharea,Noofstoreyactual,BuildingTyperesidentalcommercial,NameofBuidingsOwner,SumInsured,RiskCoverage,LatestValuationDate,NaksaPass,NoofstoriesasperNaksapass,"
+						+ "ConstructionCompletionCertificate,NomineeaccountnodebitPremium,RequestedBy,BranchSegment,StockGodown,GodownShop,PlotNo,"
+						+ "TotalStoreyofBuilding,NoofStoreygodownlocated,StockItems,StockKept,VehicleRegistratin,EngineNo,ChasisNo,ModelName,MfgCompany,Yearinsurance,Color,Otherdetailsas,MachineryLocation,MachineryBuildingowner,Noofstoreymachinery,MachineryItems,SolarLocation,"
+						+ "Solarinstalled,PAanRegisterationNo,PolicyNo,CustomerName,AssetInsured,InsuredAmount,NormalPremium,TotalPremiumAmount,TotalPremiumAmount,MaturityDate,RiskCovered,InsuranceCompany,statusInsurance,accountclose,waiverremarks,riskdate from CS_InsuranceType where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Insurance to be done ?", itemsArray[0]);
+					obj.put("Insurance Request Type", itemsArray[1]);
+					obj.put("Name of the Client", itemsArray[2]);
+					obj.put("Address", itemsArray[3]);
+					obj.put("Building Location", itemsArray[4]);
+					obj.put("Plot No. with area", itemsArray[5]);
+					obj.put("No. of storey(Actual)", itemsArray[6]);
+					obj.put("Building Type (Residential or commercial)", itemsArray[7]);
+					obj.put("Name of Building's Owner", itemsArray[8]);
+					obj.put("Sum Insured", itemsArray[9]);
+					obj.put("Risk Coverage", itemsArray[10]);
+					obj.put("Latest Valuation Date", customDate(itemsArray[11]));
+					obj.put("Naksa pass", itemsArray[12]);
+					obj.put("No. of storeies as per Naksa Pass", itemsArray[13]);
+					obj.put("Construction Completion Certificate", itemsArray[14]);
+					obj.put("Nominee account no. to debit for the premium", itemsArray[15]);
+					obj.put("Requested by", itemsArray[16]);
+					obj.put("Branch/Segment", itemsArray[17]);
+					obj.put("Stock Godown/Shop/Factory Location", itemsArray[18]);
+					obj.put("Godown/Shop/Factory Building Owner", itemsArray[19]);
+					obj.put("Plot No.", itemsArray[20]);
+					obj.put("Total Storey of bulding", itemsArray[21]);
+					obj.put("No. of storey where godown/Shop/Factory is located", itemsArray[22]);
+					obj.put("Stock items", itemsArray[23]);
+					obj.put("Stock kept in (Please indicate whether it is Godown or Shop or Fa", itemsArray[24]);
+					obj.put("Vehicle Registratin no.", itemsArray[25]);
+					obj.put("Engine No.", itemsArray[26]);
+					obj.put("Chasis No.", itemsArray[27]);
+					obj.put("Model Name", itemsArray[28]);
+					obj.put("Mfg Company", itemsArray[29]);
+					obj.put("Year", itemsArray[30]);
+					obj.put("Color", itemsArray[31]);
+					obj.put("Other details as per blue book", itemsArray[32]);
+					obj.put("Machinery/Equipment Location", itemsArray[33]);
+					obj.put("Machinery/Equipment Located factory/building owner", itemsArray[34]);
+					obj.put("No. of storey where machinery/equipment located", itemsArray[35]);
+					obj.put("Machinery/Equipment Items", itemsArray[36]);
+					obj.put("Solar Location", itemsArray[37]);
+					obj.put("Solar installed building owner", itemsArray[38]);
+					obj.put("PAN/REGISTRATION NO.", itemsArray[39]);
+					
+					obj.put("Policy No.", itemsArray[40]);
+					obj.put("CUSTOMER NAME", itemsArray[41]);
+					obj.put("ASSET INSURED", itemsArray[42]);
+					obj.put("INSURED AMOUNT", itemsArray[43]);
+					obj.put("NORMAL PREMIUM", itemsArray[44]);
+					obj.put("TOTAL PREMIUM AMOUNT", itemsArray[45]);
+					obj.put("MATURITY DATE(MM/DD/YY)", customDate(itemsArray[46]));
+					obj.put("RISK COVERED", itemsArray[47]);
+					obj.put("INSURANCE COMPANY", itemsArray[48]);
+					obj.put("STATUS", itemsArray[49]);
+					obj.put("ACCOUNT CLOSE REMARKS", itemsArray[50]);
+					obj.put("WAIVER REMARKS",itemsArray[51]);
+					obj.put("RISK START DATE",customDate(itemsArray[52]));
+					
+					jsonArray_InsuranceType.clear();
+					jsonArray_InsuranceType.add(obj);
+					
+					iFormObj.addDataToGrid("table81", jsonArray_InsuranceType);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_InsuranceType", e);
+			}
+			
+			// for CS_Waiver
+			JSONArray jsonArray_Waiver = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select WaiverType,Amount,ProposalJustification from CS_Waiver where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Waiver Type", itemsArray[0]);
+					obj.put("Amount", itemsArray[1]);
+					obj.put("Proposal and Justification", itemsArray[2]);
+					jsonArray_Waiver.clear();
+					jsonArray_Waiver.add(obj);
+					
+					iFormObj.addDataToGrid("table70", jsonArray_Waiver);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_Waiver", e);
+			}
+			
+			// for CS_AccountTurnover
+			JSONArray jsonArray_AccountTurnover = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select MonthAcTurnover,AverageUtilization from CS_AccountTurnover where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Month", itemsArray[0]);
+					obj.put("Average Utilization", itemsArray[1]);
+					jsonArray_AccountTurnover.clear();
+					jsonArray_AccountTurnover.add(obj);
+					
+					iFormObj.addDataToGrid("table61", jsonArray_AccountTurnover);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_AccountTurnover", e);
+			}
+			
+			// for CS_GroupAccountPerform
+			JSONArray jsonArray_GroupAccountPerform = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select GroupCustomer,TotalLimit,Overdue,AccountPerformance from CS_GroupAccountPerform where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Group Customer", itemsArray[0]);
+					obj.put("Total Limit", itemsArray[1]);
+					obj.put("Overdue", itemsArray[2]);
+					obj.put("Account Performance", itemsArray[3]);
+					
+					jsonArray_GroupAccountPerform.clear();
+					jsonArray_GroupAccountPerform.add(obj);
+					
+					iFormObj.addDataToGrid("table62", jsonArray_GroupAccountPerform);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_GroupAccountPerform", e);
+			}
+			
+			//for CS_ReviewAudit
+			JSONArray jsonArray_ReviewAudit = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select Comments,Auditor,ReportDate,PreviousResponse,PresentStatus from CS_ReviewAudit where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Comments", itemsArray[0]);
+					obj.put("Auditor", itemsArray[1]);
+					obj.put("Report Date", customDate(itemsArray[2]));
+					obj.put("Previous Response", itemsArray[3]);
+					obj.put("Present Status", itemsArray[4]);
+					jsonArray_ReviewAudit.clear();
+					jsonArray_ReviewAudit.add(obj);
+					
+					iFormObj.addDataToGrid("table64", jsonArray_ReviewAudit);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_ReviewAudit", e);
+			}
+			
+			// for CS_FacilityDetailIns
+			JSONArray jsonArray_FacilityDetailIns = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select FacilityType,Proposed from CS_FacilityDetailIns where  PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Facility Type", itemsArray[0]);
+					obj.put("Proposed", itemsArray[1]);
+					jsonArray_FacilityDetailIns.clear();
+					jsonArray_FacilityDetailIns.add(obj);
+					
+					iFormObj.addDataToGrid("table104", jsonArray_FacilityDetailIns);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_FacilityDetailIns", e);
+			}
+			// for CS_DetailGuarantorCIBIns
+			JSONArray jsonArray_DetailGuarantorCIBIns = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select NameofGurantor,Gender,Nationality,RelationToApplicant,IndianEmbassyNo,passportno,passportissuedate,CitizenshipNo,CitizenshipIssueDate,citizendatebs,CitizenshipIssueDistrict,DateofBirth,"
+						+ "PanNo,Panissuedate,Panissueddistrict,voteridno,WardNo,StreetName,District,CityPlace,ProvinceState,FatherName,GrandfatherName,MotherName,SpouseName,"
+						+ "from CS_DetailGuarantorCIBIns where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Name of Proprietor/Partner/Shareholder/Guarantor", itemsArray[0]);
+					obj.put("Gender", itemsArray[1]);
+					obj.put("Nationality", itemsArray[2]);
+					obj.put("Relation with Firm/Company", itemsArray[3]);
+					obj.put("Indian Embassy No.", itemsArray[4]);
+					obj.put("Passport No", itemsArray[5]);
+					obj.put("Passport Issued Date", customDate(itemsArray[6]));
+					obj.put("Citizenship No.", itemsArray[7]);
+					obj.put("Citizenship Issued Date", customDate(itemsArray[8]));
+					obj.put("Citizenship Issued Date (BS)", customDate(itemsArray[9]));
+					obj.put("Citizenship Issued District", itemsArray[10]);
+					obj.put("Date of Birth", customDate(itemsArray[11]));
+					obj.put("PAN No", itemsArray[12]);
+					obj.put("PAN Issued Date", GridToGridDataFetchSME.customDate(itemsArray[13]));
+					obj.put("PAN Issued District", itemsArray[14]);
+					obj.put("Voter ID No.", itemsArray[15]);
+					obj.put("Ward No.", itemsArray[16]);
+					obj.put("Street Name", itemsArray[17]);
+					obj.put("District", itemsArray[18]);
+					obj.put("City / Place", itemsArray[19]);
+					obj.put("Province / State", itemsArray[20]);
+					obj.put("Father's Name", itemsArray[21]);
+					obj.put("Grandfather's Name", itemsArray[22]);
+					obj.put("Mother's Name", itemsArray[23]);
+					obj.put("Spouse Name", itemsArray[24]);
+					
+					jsonArray_DetailGuarantorCIBIns.clear();
+					jsonArray_DetailGuarantorCIBIns.add(obj);
+					
+					iFormObj.addDataToGrid("table72", jsonArray_DetailGuarantorCIBIns);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_DetailGuarantorCIBIns", e);
+			}
+			// for CS_CorporateGuarantorCIBIns
+			JSONArray jsonArray_CorporateGuarantorCIBIns = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select NameofFirm,FirmRegisterNo,FirmRegisterDate,RegisterBody,PANNo,PANRegisterDate,PANRegisterDistrict,FirmRegisterExpiryDate,RegisteredAddress,"
+						+ "from CS_CorporateGuarantorCIBIns where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Name of the firm / Company", itemsArray[0]);
+					obj.put("Firm / Company Registration No.", itemsArray[1]);
+					obj.put("Firm / Company Registration Date", customDate(itemsArray[2]));
+					obj.put("Registered Body", itemsArray[3]);
+					obj.put("PAN Number", itemsArray[4]);
+					obj.put("PAN Registration Date", customDate(itemsArray[5]));
+					obj.put("PAN Registration District", itemsArray[6]);
+					obj.put("Registered Address", itemsArray[7]);
+			
+					jsonArray_CorporateGuarantorCIBIns.clear();
+					jsonArray_CorporateGuarantorCIBIns.add(obj);
+					
+					iFormObj.addDataToGrid("table73", jsonArray_CorporateGuarantorCIBIns);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_CorporateGuarantorCIBIns", e);
+			}
+			// for CS_CIBStatus
+			/*
+			JSONArray jsonArray_CIBStatus = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select ClientGuarantorName,CIBGeneratedDate,CIBStatus,nrbcategory,LoanWithOtherBank,CIBRequestID,OtherLiabilityRequestID,Amount from CS_CIBStatus where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Client / Guarantor Name", itemsArray[0]);
+					obj.put("CIB Generated Date", customDate(itemsArray[1]));
+					obj.put("CIB Status", itemsArray[2]);
+					obj.put("NRB Category", itemsArray[3]);
+					obj.put("Loan with other Bank", itemsArray[4]);
+					obj.put("CIB Request ID", itemsArray[5]);
+					obj.put("Other Liability Request ID", itemsArray[6]);
+					obj.put("Amount", itemsArray[7]);
+					jsonArray_CIBStatus.clear();
+					jsonArray_CIBStatus.add(obj);
+					
+					iFormObj.addDataToGrid("table66", jsonArray_CIBStatus);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_CIBStatus", e);
+			}
+			
+			*/
+			// for CS_Groupsheet
+			JSONArray jsonArray_Groupsheet = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select Customer,riskgrade,currentlimitfund,proposedlimitfund,outstandinglimitfund,changesfund,currentnonfund,proposednonfund,outstandingnonfund,changesnonfund,"
+						+ "collateraldetails,valuationdate,totalproposed,FMV,loantovalue from CS_Groupsheet where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Customer", itemsArray[0]);
+					obj.put("Risk Grade", itemsArray[1]);
+					obj.put("Current Limit-Fund Based", itemsArray[2]);
+					obj.put("Proposed Limit-Fund Based", itemsArray[3]);
+					obj.put("Outstanding-Fund Based", itemsArray[4]);
+					obj.put("Changes-Fund Based", itemsArray[5]);
+					obj.put("Current Limit-Non Fund Based", itemsArray[6]);
+					obj.put("Proposed Limit-Non Fund Based", itemsArray[7]);
+					obj.put("Outstanding-Non Fund Based", itemsArray[8]);
+					obj.put("Changes-Non Fund Based", itemsArray[9]);
+					obj.put("Collateral Details", itemsArray[10]);
+					obj.put("Valuation Details", customDate(itemsArray[11]));
+					obj.put("Total Proposed", itemsArray[12]);
+					obj.put("Fair Market Value (FMV)", itemsArray[13]);
+					obj.put("Loan to Value Ratio", itemsArray[14]);
+					
+					jsonArray_Groupsheet.clear();
+					jsonArray_Groupsheet.add(obj);
+					
+					iFormObj.addDataToGrid("table99", jsonArray_Groupsheet);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_Groupsheet", e);
+			}
+			// for CS_Netgroup
+			JSONArray jsonArray_Netgroup = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select netgroup,riskgrade,Currentfund,Proposedfund,Outstandingfund,changesfund,currentnonfund,proposednonfund,outstandingnonfund,changesnonfund,totalproposed from CS_Netgroup where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Exception to Single Obligor/Net Group Exposure", itemsArray[0]);
+					obj.put("Risk Grade", itemsArray[1]);
+					obj.put("Current Limit Fund Based", itemsArray[2]);
+					obj.put("Proposed Limit Fund Based", itemsArray[3]);
+					obj.put("Outstanding Fund Based", itemsArray[4]);
+					obj.put("Changes-Fund Based", itemsArray[5]);
+					obj.put("Current Limit Non Fund Based", itemsArray[6]);
+					obj.put("Proposed Limit Non Fund Based", itemsArray[7]);
+					obj.put("Outstanding Non Fund Based", itemsArray[8]);
+					obj.put("Changes Non Fund based", itemsArray[9]);
+					obj.put("Total Proposed", itemsArray[10]);
+
+					jsonArray_Netgroup.clear();
+					jsonArray_Netgroup.add(obj);
+					
+					iFormObj.addDataToGrid("table100", jsonArray_Netgroup);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_Netgroup", e);
+			}
+//			// for CS_Comment
+//			JSONArray jsonArray_Comment = new JSONArray();
+//			try
+//			{
+//				int count = 0;
+//				String pID = (String) iFormObj.getValue("AOVehicleRegisterNoID");
+//				String query="Select Decision,Remarks,C_Date,WS_Name,C_Date1,LoggedInUser,BranchName from CS_Comment where PID='"+pID+"'";
+//				LogMessages.statusLogSME.info("Query: " + query);
+//				List QueryList = iFormObj.getDataFromDB(query);
+//				ListIterator QueryListItr = QueryList.listIterator();
+//				while(QueryListItr.hasNext())
+//				{
+//					List rowData = (List) QueryListItr.next();
+//					String[] itemsArray = new String[rowData.size()];
+//					itemsArray = (String[]) rowData.toArray(itemsArray);
+//
+//					JSONObject obj = new JSONObject();
+//					obj.put("Decision", itemsArray[0]);
+//					obj.put("Date", itemsArray[1]);
+//					obj.put("From Workstep", itemsArray[2]);
+//					obj.put("Logged In User", itemsArray[3]);
+//					obj.put("Comment", itemsArray[4]);
+//					jsonArray_Comment.clear();
+//					jsonArray_Comment.add(obj);
+//					
+//					iFormObj.addDataToGrid("table22", jsonArray_Comment);
+//					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+//					count++;
+//				}
+//			}
+//			catch(Exception e)
+//			{
+//				LogMessages.errorLogSME.info("Exception found in CS_Comment", e);
+//			}
+			// for CS_refer
+			//JSONArray jsonArray_refer = new JSONArray();
+			//try
+			//{
+				//int count = 0;
+				//String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				//String query="Select response,responsedate from CS_refer where PID='"+pID+"'";
+				//LogMessages.statusLogSME.info("Query: " + query);
+				//List QueryList = iFormObj.getDataFromDB(query);
+				//ListIterator QueryListItr = QueryList.listIterator();
+				//while(QueryListItr.hasNext())
+				//{
+					//List rowData = (List) QueryListItr.next();
+					//String[] itemsArray = new String[rowData.size()];
+					//itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					//JSONObject obj = new JSONObject();
+					//obj.put("Response from Respondent", itemsArray[0]);
+					//obj.put("Replied date", itemsArray[1]);
+				
+					//jsonArray_refer.clear();
+					//jsonArray_refer.add(obj);
+					
+					//iFormObj.addDataToGrid("table108", jsonArray_refer);
+					//LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					//count++;
+				//}
+			//}
+			//catch(Exception e)
+			//{
+				//LogMessages.errorLogSME.info("Exception found in CS_refer", e);
+			//}
+			// for CS_Covenant
+			JSONArray jsonArray_Covenant = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select CovenantDetails,CovenantMonitoring,CovenantDate,convenantcate from CS_Covenant where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Covenants Category", itemsArray[0]);
+					obj.put("Covenant Details", itemsArray[1]);
+					obj.put("Covenant Monitoring Frequency", itemsArray[2]);
+					obj.put("Covenant Activation / Completion Date", customDate(itemsArray[3]));
+					obj.put("Outstanding", itemsArray[4]);
+					obj.put("Remarks", itemsArray[5]);
+					
+					jsonArray_Covenant.clear();
+					jsonArray_Covenant.add(obj);
+					
+					iFormObj.addDataToGrid("table107", jsonArray_Covenant);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_Covenant", e);
+			}
+			// for CS_PropertyMortgage
+			JSONArray jsonArray_PropertyMortgage = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select Property,NameOfOwner,VdcMunicipality,District,PlotNo,WardNo,PlaceStreetName,Location,Area,MobileNo,BranchName,RmName,RmEmail  from CS_PropertyMortgage where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Property", itemsArray[0]);
+					obj.put("Name of Owner", itemsArray[1]);
+					obj.put("VDC/Municipality", itemsArray[2]);
+					obj.put("District", itemsArray[3]);
+					obj.put("Plot No", itemsArray[4]);
+					obj.put("Ward No", itemsArray[5]);
+					obj.put("Place(StreetName)", itemsArray[6]);
+					obj.put("Location", itemsArray[7]);
+					obj.put("Area", itemsArray[8]);
+					obj.put("Mobile No", itemsArray[9]);
+					obj.put("Branch Name", itemsArray[10]);
+					obj.put("RM Name", itemsArray[11]);
+					obj.put("RM Email", itemsArray[12]);
+					
+					jsonArray_PropertyMortgage.clear();
+					jsonArray_PropertyMortgage.add(obj);
+					
+					iFormObj.addDataToGrid("table80", jsonArray_PropertyMortgage);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_PropertyMortgage", e);
+			}
+			// for CS_MultipleDisburse
+			JSONArray jsonArray_MultipleDisburse = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select Facility,LimitSuffix,Nature,Approved,Disbursement,Outstanding,InterestRate,RequestedAmount,statusDisburse,UtilizeAmount,AvailableAmount,AccountnoEI from CS_MultipleDisburse where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Facility Type", itemsArray[0]);
+					obj.put("Limit Suffix", itemsArray[1]);
+					obj.put("Nature", itemsArray[2]);
+					obj.put("Approved Amount", itemsArray[3]);
+					obj.put("Already Disburse", itemsArray[4]);
+					obj.put("Unutilized Amount", itemsArray[5]);
+					obj.put("Interest Rate", itemsArray[6]);
+					obj.put("Requested Amount", itemsArray[7]);
+					obj.put("Utilize Amount", itemsArray[8]);
+					obj.put("Available Amount", itemsArray[9]);
+					obj.put("Account Number(EI case)", itemsArray[10]);
+					
+					jsonArray_MultipleDisburse.clear();
+					jsonArray_MultipleDisburse.add(obj);
+					
+					iFormObj.addDataToGrid("table74", jsonArray_MultipleDisburse);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_MultipleDisburse", e);
+			}
+			// for CS_DisburseStatus
+			JSONArray jsonArray_DisburseStatus = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select DateDis,Limitsuffix,Requestamount,statusDisbursest from CS_DisburseStatus where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Date", itemsArray[0]);
+					obj.put("Limit Suffix", itemsArray[1]);
+					obj.put("Request Amount", itemsArray[2]);
+					obj.put("Status", itemsArray[3]);
+			
+					jsonArray_DisburseStatus.clear();
+					jsonArray_DisburseStatus.add(obj);
+					
+					iFormObj.addDataToGrid("table96", jsonArray_DisburseStatus);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_DisburseStatus", e);
+			}
+			// for CS_NewFacility
+			JSONArray jsonArray_NewFacility = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select FacilityID,FacilityType,LimitSuffix,ParentID,CCY,Facility,StatusFac,schemecode,Accountno,acstatus,disbursestatus,RequestedAmount from CS_NewFacility where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Facility ID", itemsArray[0]);
+					obj.put("Facility Type", itemsArray[1]);
+					obj.put("Limit Suffix", itemsArray[2]);
+					obj.put("Parent ID", itemsArray[3]);
+					obj.put("CCY", itemsArray[4]);
+					obj.put("Facility", itemsArray[5]);
+					obj.put("Status", itemsArray[6]);
+					obj.put("Scheme Code", itemsArray[7]);
+					obj.put("Account No", itemsArray[8]);
+					obj.put("Account Creation Status", itemsArray[9]);
+					obj.put("Disbursement Status", itemsArray[10]);
+					obj.put("Requested Amount", itemsArray[11]);
+					
+					jsonArray_NewFacility.clear();
+					jsonArray_NewFacility.add(obj);
+					
+					iFormObj.addDataToGrid("table94", jsonArray_NewFacility);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_NewFacility", e);
+			}
+			// for CS_LoanAC
+			JSONArray jsonArray_LoanAC = new JSONArray();
+			try
+			{
+				int count = 0;
+				String pID = (String) iFormObj.getValue("BusinessActivityPD");
+				String query="Select Schemecode,FacilityType,Accountno,StatusLoan from CS_LoanAC where PID='"+pID+"'";
+				LogMessages.statusLogSME.info("Query: " + query);
+				List QueryList = iFormObj.getDataFromDB(query);
+				ListIterator QueryListItr = QueryList.listIterator();
+				while(QueryListItr.hasNext())
+				{
+					List rowData = (List) QueryListItr.next();
+					String[] itemsArray = new String[rowData.size()];
+					itemsArray = (String[]) rowData.toArray(itemsArray);
+
+					JSONObject obj = new JSONObject();
+					obj.put("Scheme Code", itemsArray[0]);
+					obj.put("Facility Type", itemsArray[1]);
+					obj.put("Account No", itemsArray[2]);
+					obj.put("Status", itemsArray[3]);
+					
+					jsonArray_LoanAC.clear();
+					jsonArray_LoanAC.add(obj);
+					
+					iFormObj.addDataToGrid("table92", jsonArray_NewFacility);
+					LogMessages.statusLogSME.info("*** Data added to the grid ***");
+					count++;
+				}
+			}
+			catch(Exception e)
+			{
+				LogMessages.errorLogSME.info("Exception found in CS_LoanAC", e);
+			}
+			LogMessages.errorLogSME.info("Success");
+			 return fetch_all_combo_data;
+			
+			
+		}
+}

@@ -1,0 +1,2 @@
+INDEX VERSION 1.4+C:\Users\CAS\Desktop\SOAP Projects\.metadata\.plugins\org.eclipse.wst.jsdt.core\indexes
+437506541.index

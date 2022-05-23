@@ -1,0 +1,14 @@
+package com.bharat.trainings.ws.client;
+
+import com.bharath.ws.soap.PaymentProcessorImplService;
+
+public class PaymentWSClient {
+
+	public static void main(String[] args) 
+	{
+		PaymentProcessorImplService service=new PaymentProcessorImplService("http://localhost:8080/javafirstws/paymentProcessor?wsdl");
+		
+
+	}
+
+}

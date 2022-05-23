@@ -1,0 +1,13 @@
+package com.lamichhane.restwsasync;
+
+import com.lamichhane.restwsasync.model.ChecksList;
+
+public class CheckProcessorImpl implements CheckProcessor {
+
+	@Override
+	public Boolean processChecks(ChecksList checksList) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

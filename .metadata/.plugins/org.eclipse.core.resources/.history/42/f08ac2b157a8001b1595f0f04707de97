@@ -1,0 +1,37 @@
+package com.lamichhane.jaxrsinjection;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ws.rs.QueryParam;
+
+import org.springframework.stereotype.Service;
+
+import com.lamichhane.jaxrsinjection.model.Passanger;
+
+@Service
+public class PassangerServiceImpl implements PassengerService {
+	
+	List<Passanger> passengers=new ArrayList<>();
+	int currentId=123;
+
+	@Override
+	public List<Passanger> getPassangers(int start,int size) {
+		System.out.println(start);
+		System.out.println(size);
+		
+		return passengers;
+	}
+
+	@Override
+	public void addPassanger(String firstName,String lastName) 
+	{
+		passanger.setId(currentId++);
+		passengers.add(passanger);
+		return passanger;
+	}
+
+
+
+
+}

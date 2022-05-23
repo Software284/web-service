@@ -1,0 +1,13 @@
+package com.lamichhane.restwsasync;
+
+import javax.ws.rs.container.AsyncResponse;
+
+import com.lamichhane.restwsasync.model.ChecksList;
+
+public abstract class CheckProcessorImpl implements CheckProcessor {
+
+	
+
+	
+
+}

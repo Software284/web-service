@@ -1,0 +1,7 @@
+package com.lamichhane.restwsasync;
+
+public interface CheckProcessor
+{
+	public Boolean processChecks(ChecksList checksList)
+
+}

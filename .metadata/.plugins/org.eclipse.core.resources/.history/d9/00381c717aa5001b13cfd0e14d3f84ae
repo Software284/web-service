@@ -1,0 +1,20 @@
+package com.lamichhane.mtom;
+
+import javax.activation.DataHandler;
+
+public class FileWsImpl implements FileWs {
+
+	@Override
+	public void upload(DataHandler attachment) 
+	{
+		
+
+	}
+
+	@Override
+	public DataHandler download() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

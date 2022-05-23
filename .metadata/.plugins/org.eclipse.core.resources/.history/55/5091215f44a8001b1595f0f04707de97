@@ -1,0 +1,6 @@
+import javax.ws.rs.ext.MessageBodyReader;
+
+public class MyMessageBodyReader implements MessageBodyReader<T> 
+{
+
+}

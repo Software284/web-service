@@ -1,0 +1,29 @@
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
+
+import com.lamichhane.restwsclient.model.Patient;
+
+public class PatientWSClient {
+
+	public static void main(String[] args)
+	{
+		Client client = ClientBuilder.newClient();
+		WebTarget target = client.target("http://localhost:8080/restws/services/Patientservice/patients/123");
+		Builder request = target.request();
+		try
+		{
+		//Patient patient = request.get(Patient.class);
+		//System.out.println(patient.getId());
+		//System.out.println(patient.getName());
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+
+	}
+
+}

@@ -1,0 +1,13 @@
+package com.lamichhane.restwsasync;
+
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+
+@Path("/checkprocessingservice")
+public interface CheckProcessor
+{
+	@POST
+	@Path("/checks")
+	public Boolean processChecks(ChecksList checksList);
+
+}

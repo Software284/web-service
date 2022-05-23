@@ -1,0 +1,7 @@
+package com.lamichhane.soapwebservice.handlers;
+
+import javax.xml.ws.handler.soap.SOAPHandler;
+
+public class SiteHandler implements SOAPHandler<T> {
+
+}

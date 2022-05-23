@@ -1,0 +1,58 @@
+ext:variable:
+PanRegisterDatePD1 ,ClientNamePD ,IHaveEnquiredFamilyCIR ,RevolvingOrTerminatingFac ,OtherBank ,TotalFmvLandCIR,NetDisposableIncome,TenureFac ,ClientNamePD ,SalaryIncome ,BusinessIncome,RentalIncome,ProfessionIncome,FinishedGoodsBSIR,TotalIncome,NetDisposableIncome,HouseholdExpenses,RentalExpenses,TransportationExpenses,OtherBankEMI,MiscellenousExpenses,TotalExpenses,RegularityofPayment,AccountConduct,ReviewPeriodFrom,ReviewPeriodTill,TotalCreditVolume,TotalCreditTransaction,AccountTurnover,CommitmentFeesFac,AccountGroupProfitability,AuditCommentsAR,AccountStrategy,AuditDateAR,ConsistentBlueprintCIR,SummaryRecommendation,Checklist10,Checklist11,Checklist12,Checklist13,Checklist14,Checklist15,Checklist16,Checklist17,Checklist18,Checklist19,Checklist20,Checklist7,Checklist8,Checklist9,ECurrentRatioFin,HERiskCoverageIsRSTMDRequiredID,HouseNo,NameOfValuatorCIR,MotherNameCIBInd,NumberOfCollateralCIR,OverDueBD,OwnershipTransferThruCIR
+
+
+
+Legend:
+
+select Abbreviation,Fullform from CS_Legend
+-----
+Personal Net- Worth Details:
+
+select ClientName,landandbuilding,others,Laibilities,NetWorth from CS_IndividualGuarantor
+------
+INFORMATION ON THE COMPANY/FIRM:
+
+select TypeofBusiness,Name,TypeofBusiness,Registeredunder,PANNumber,OperatingAddress,BusinessActivity from CS_BusinessIncome
+-----
+SUMMARIZED FINANCIALS OF BUSINESS:
+
+select SalesAmount,NetProfit,FreeNetProfit from CS_BusinessIncome
+------
+Income Risk:
+
+select RiskFactor,Mitigants from CS_BusinessManagementRisk
+----
+Security Risk:
+
+select SecurityRisk,Mitigants from CS_SecurityRisk
+----
+Succession Risk:
+
+select RiskFactor,Mitigants from CS_EnvironmentalSocialRisk
+----
+ACCOUNT PERFORMANCE:
+
+select MonthAcTurnover,AverageUtilization from CS_AccountTurnover
+----
+GROUP ACCOUNT PERFORMANCE:
+
+select GroupCustomer,TotalLimit,Overdue,AccountPerformance from CS_GroupAccountPerform
+-----
+ADHERENCE TO COVENANTS:
+
+select CommentApproving,Adherence from CS_CommentsApproving
+select CovenantDetails,CovenantMonitoring,CovenantDate from CS_Covenant
+-----
+REVIEW OF AUDIT COMMENTS:
+
+select Comments,Auditor,ReportDate,PreviousResponse,PresentStatus from CS_ReviewAudit
+-----
+
+Customer Group Summary:
+select Customer,riskgrade,currentlimitfund,proposedlimitfund,outstandinglimitfund,changesfund,currentnonfund,proposednonfund,outstandingnonfund,changesnonfund,totalproposed from CS_GroupSheet
+
+select netgroup,Riskgrade,Currentfund,Proposedfund,Outstandingfund,changesfund,currentnonfund,proposednonfund,outstandingnonfund,changesnonfund,totalproposed from CS_GroupSheet
+
+select Customer,collateraldetails,valuationdate,FMV,loantovalue from CS_GroupSheet
+

@@ -1,0 +1,11 @@
+package com.bharat.trainings.ws.client;
+
+public class PaymentWSClient {
+
+	public static void main(String[] args) 
+	{
+		
+
+	}
+
+}

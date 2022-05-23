@@ -1,0 +1,10 @@
+package com.lamichhane.restwsasynclient.client;
+
+public class CheckProcessingClient {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+
+	}
+
+}

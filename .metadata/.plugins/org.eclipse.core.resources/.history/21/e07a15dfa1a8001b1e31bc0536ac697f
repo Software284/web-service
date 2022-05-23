@@ -1,0 +1,11 @@
+package com.lamichhane.restwsasync;
+
+
+
+public class CheckProcessorImpl implements CheckProcessor {
+
+	
+
+	
+
+}

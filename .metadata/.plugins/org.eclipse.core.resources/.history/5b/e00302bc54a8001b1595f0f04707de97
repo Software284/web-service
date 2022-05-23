@@ -1,0 +1,15 @@
+package com.lamichhane.jaxrsinjection;
+
+import java.util.List;
+
+import com.lamichhane.jaxrsinjection.model.Passanger;
+
+@Path("/passengerservice")
+public interface PassengerService {
+
+	
+	List<Passanger> getPassangers();
+
+	Passanger addPassanger(Passanger passanger);
+
+}

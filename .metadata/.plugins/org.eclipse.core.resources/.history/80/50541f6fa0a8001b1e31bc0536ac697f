@@ -1,0 +1,9 @@
+package com.lamichhane.restwsasync.model;
+
+public class Check 
+{
+	private String checkNumber;
+	private String accountNumber;
+	private Double amount;
+
+}

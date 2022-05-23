@@ -1,0 +1,12 @@
+package com.lamichhane.utclient;
+
+public class PaymentWSClient {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		
+	
+
+	}
+
+}
